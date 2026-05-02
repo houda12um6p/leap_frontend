@@ -42,3 +42,51 @@ export interface ProjectOverview {
   unresolved_alerts: number;
   total_contributors: number;
 }
+
+export interface JiraTask {
+  jira_key: string;
+  summary: string;
+  status: string;
+  story_points: number;
+}
+
+export interface MergeRequestSummary {
+  id: string;
+  github_id: number | null;
+  title: string;
+  status: string;
+  score: number;
+  story_points: number;
+  refactored_lines: number;
+  lines_modified: number;
+  author_id: string | null;
+  author_name: string | null;
+  author_email: string | null;
+  project_id: string;
+  jira_task_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface CommitInfo {
+  sha: string;
+  message: string;
+  date: string | null;
+  author_id: string | null;
+  author_name: string | null;
+  commit_type: 'feature' | 'bugfix' | 'refactor' | 'other';
+}
+
+export interface ReviewCommentInfo {
+  id: string;
+  body: string;
+  severity_weight: number;
+  author_id: string | null;
+  author_name: string | null;
+  created_at: string | null;
+}
+
+export interface MergeRequestDetail extends MergeRequestSummary {
+  commits: CommitInfo[];
+  review_comments: ReviewCommentInfo[];
+}

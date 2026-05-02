@@ -16,6 +16,15 @@ button {
   font-family: inherit;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #00C27C;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 main::-webkit-scrollbar {
   width: 8px;
 }
@@ -25,4 +34,74 @@ main::-webkit-scrollbar-track {
 main::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
+}
+
+@keyframes leap-toast-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes leap-skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.leap-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.04) 100%);
+  background-size: 800px 100%;
+  animation: leap-skeleton-shimmer 1.4s linear infinite;
+  border-radius: 6px;
+}
+
+@keyframes leap-spin {
+  to { transform: rotate(360deg); }
+}
+
+.leap-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: leap-spin 0.7s linear infinite;
+  vertical-align: -2px;
+}
+
+@media (max-width: 900px) {
+  .leap-sidebar {
+    display: none !important;
+  }
+  .leap-main {
+    padding: 16px !important;
+  }
+  .leap-header {
+    padding: 0 14px !important;
+    gap: 8px !important;
+  }
+  .leap-metric-row {
+    flex-wrap: wrap !important;
+  }
+  .leap-metric-row > * {
+    flex: 1 1 calc(50% - 14px) !important;
+    min-width: 140px;
+  }
+  .leap-dev-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .leap-projects-row,
+  .leap-projects-head {
+    grid-template-columns: 1.5fr 1fr 80px !important;
+  }
+  .leap-projects-row > .leap-col-score,
+  .leap-projects-head > .leap-col-score,
+  .leap-projects-row > .leap-col-repo,
+  .leap-projects-head > .leap-col-repo {
+    display: none !important;
+  }
+  .leap-auth-card {
+    width: calc(100vw - 28px) !important;
+    max-width: 420px;
+    padding: 26px 20px 22px !important;
+  }
 }

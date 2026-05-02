@@ -6,15 +6,18 @@ import { Field } from '../components/ui/Field';
 import { PrimaryButton } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
-      width: '100%', height: '100vh',
+      width: '100%', minHeight: '100vh',
       background: TOKENS.bg, fontFamily: FONT,
       position: 'relative', overflow: 'hidden',
       display: 'grid', placeItems: 'center',
+      padding: 14,
     }}>
-      <div style={{
+      <div aria-hidden style={{
         position: 'absolute', inset: 0,
         backgroundImage: `linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)`,
         backgroundSize: '48px 48px',
@@ -34,13 +37,20 @@ export function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
+  const [touched, setTouched] = useState({ email: false, pw: false });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
+
+  const emailErr = touched.email && !email ? 'Email is required.'
+    : touched.email && !EMAIL_RE.test(email) ? 'Enter a valid email address.' : '';
+  const pwErr = touched.pw && !pw ? 'Password is required.' : '';
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr('');
-    if (!email || !pw) { setErr('Email and password are required.'); return; }
+    setTouched({ email: true, pw: true });
+    if (!email || !EMAIL_RE.test(email)) return;
+    if (!pw) return;
     setLoading(true);
     try {
       await login(email, pw);
@@ -54,7 +64,7 @@ export function LoginPage() {
 
   return (
     <AuthShell>
-      <form onSubmit={submit} style={{
+      <form onSubmit={submit} className="leap-auth-card" noValidate style={{
         width: 420,
         background: TOKENS.bgElev,
         border: `1px solid ${TOKENS.border}`,
@@ -70,9 +80,23 @@ export function LoginPage() {
         </div>
 
         <div style={{ display: 'grid', gap: 16, marginBottom: 22 }}>
-          <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@ocp.ma" autoFocus />
+          <Field
+            label="Email" type="email" autoComplete="email"
+            value={email}
+            onChange={(v) => { setEmail(v); if (!touched.email) setTouched(t => ({ ...t, email: true })); }}
+            placeholder="you@ocp.ma" autoFocus
+            error={emailErr}
+            required
+          />
           <div>
-            <Field label="Password" type="password" value={pw} onChange={setPw} placeholder="••••••••" />
+            <Field
+              label="Password" type="password" autoComplete="current-password"
+              value={pw}
+              onChange={(v) => { setPw(v); if (!touched.pw) setTouched(t => ({ ...t, pw: true })); }}
+              placeholder="••••••••"
+              error={pwErr}
+              required
+            />
             <div style={{ textAlign: 'right', marginTop: 6 }}>
               <span style={{ color: TOKENS.textDim, fontSize: 11.5 }}>Forgot password?</span>
             </div>
@@ -80,14 +104,14 @@ export function LoginPage() {
         </div>
 
         {err && (
-          <div style={{
+          <div role="alert" style={{
             padding: '8px 11px', background: TOKENS.dangerSoft,
             border: `1px solid ${TOKENS.danger}40`, borderRadius: 7,
             color: TOKENS.danger, fontSize: 12, marginBottom: 14,
           }}>{err}</div>
         )}
 
-        <PrimaryButton type="submit" full disabled={loading}>
+        <PrimaryButton type="submit" full loading={loading}>
           {loading ? 'Signing in…' : 'Sign In'}
         </PrimaryButton>
 
@@ -97,10 +121,11 @@ export function LoginPage() {
           textAlign: 'center', fontSize: 13, color: TOKENS.textDim,
         }}>
           New to LEAP?{' '}
-          <span
+          <button
+            type="button"
             onClick={() => navigate('/register')}
-            style={{ color: TOKENS.accent, fontWeight: 500, cursor: 'pointer' }}
-          >Create an account →</span>
+            style={{ background: 'transparent', border: 'none', color: TOKENS.accent, fontWeight: 500, cursor: 'pointer', font: 'inherit', padding: 0 }}
+          >Create an account →</button>
         </div>
       </form>
     </AuthShell>

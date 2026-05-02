@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TOKENS, FONT, FONT_MONO } from '../styles/tokens';
 import { AppShell } from '../components/layout/AppShell';
 import { SeverityPill } from '../components/ui/SeverityPill';
 import { OutlineGreenButton } from '../components/ui/Button';
+import { Skeleton } from '../components/ui/Skeleton';
+import { RelativeTime } from '../components/ui/RelativeTime';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { getProjects, getAlerts, resolveAlert as apiResolveAlert } from '../services/api';
 import { Alert } from '../types';
 
-function AlertCard({ alert, onResolve }: { alert: Alert; onResolve: (id: string) => void }) {
+function AlertCard({ alert, onResolve, busy }: { alert: Alert; onResolve: (id: string) => void; busy: boolean }) {
   const [hover, setHover] = useState(false);
   const isResolved = alert.is_resolved;
   const severityColor = isResolved ? 'rgba(255,255,255,0.18)' : (
@@ -29,8 +32,9 @@ function AlertCard({ alert, onResolve }: { alert: Alert; onResolve: (id: string)
         display: 'flex', alignItems: 'flex-start', gap: 18,
         opacity: isResolved ? 0.55 : 1,
         transition: 'all 0.15s',
+        flexWrap: 'wrap',
       }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 220 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
           <SeverityPill level={alert.severity} />
           {isResolved && (
@@ -40,14 +44,14 @@ function AlertCard({ alert, onResolve }: { alert: Alert; onResolve: (id: string)
               fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase',
               fontFamily: FONT_MONO, display: 'inline-flex', alignItems: 'center', gap: 5,
             }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden focusable="false">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               Resolved
             </span>
           )}
-          <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: TOKENS.textFaint, letterSpacing: 0.3, marginLeft: 'auto' }}>
-            {new Date(alert.created_at).toLocaleString()}
+          <span style={{ marginLeft: 'auto' }}>
+            <RelativeTime iso={alert.created_at} />
           </span>
         </div>
         <div style={{ fontFamily: FONT, fontSize: 14.5, color: TOKENS.text, fontWeight: 500, letterSpacing: -0.2, marginBottom: 5 }}>
@@ -56,13 +60,10 @@ function AlertCard({ alert, onResolve }: { alert: Alert; onResolve: (id: string)
         <div style={{ fontFamily: FONT, fontSize: 12.5, color: TOKENS.textDim, lineHeight: 1.5 }}>
           {alert.type}
         </div>
-        <div style={{ marginTop: 10, fontFamily: FONT_MONO, fontSize: 10.5, color: TOKENS.textFaint, letterSpacing: 0.4 }}>
-          SOURCE · {(alert.project_id || '').toUpperCase()}
-        </div>
       </div>
       <div style={{ flexShrink: 0 }}>
         {!isResolved
-          ? <OutlineGreenButton onClick={() => onResolve(alert.id)}>Resolve</OutlineGreenButton>
+          ? <OutlineGreenButton onClick={() => onResolve(alert.id)} loading={busy}>Resolve</OutlineGreenButton>
           : <OutlineGreenButton disabled>Resolved</OutlineGreenButton>}
       </div>
     </div>
@@ -92,54 +93,86 @@ type TabKey = 'open' | 'resolved' | 'all';
 
 export function AlertsPage() {
   const { user, logout } = useAuth();
+  const toast = useToast();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [tab, setTab] = useState<TabKey>('open');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         const projs = await getProjects();
+        if (cancelled) return;
         if (projs.length > 0) {
-          const alrts = await getAlerts(projs[0].id);
-          setAlerts(Array.isArray(alrts) ? alrts : []);
+          const lists = await Promise.all(projs.map(p => getAlerts(p.id).catch(() => [] as Alert[])));
+          if (cancelled) return;
+          setAlerts(lists.flat());
+        } else {
+          setAlerts([]);
         }
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
+      } catch (e) {
+        toast.error('Could not load alerts', 'Check your connection and try again.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
     load();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resolveAlert = async (id: string) => {
+    setResolvingId(id);
     try {
       await apiResolveAlert(id);
       setAlerts(prev => prev.map(a => a.id === id ? { ...a, is_resolved: true } : a));
-    } catch (e) { console.error('resolve error', e); }
+      toast.success('Alert resolved');
+    } catch (e) {
+      toast.error('Could not resolve alert', 'Please try again.');
+    } finally {
+      setResolvingId(null);
+    }
   };
 
   const unresolved = alerts.filter(a => !a.is_resolved);
   const counts = { all: alerts.length, open: unresolved.length, resolved: alerts.length - unresolved.length };
-  const filtered = tab === 'open' ? unresolved : tab === 'resolved' ? alerts.filter(a => a.is_resolved) : alerts;
-
-  if (loading) return (
-    <div style={{ width: '100%', height: '100vh', background: TOKENS.bg, display: 'grid', placeItems: 'center', color: TOKENS.accent, fontFamily: FONT, fontSize: 14, letterSpacing: 1 }}>
-      LOADING…
-    </div>
-  );
+  const filteredByTab = tab === 'open' ? unresolved : tab === 'resolved' ? alerts.filter(a => a.is_resolved) : alerts;
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return filteredByTab;
+    return filteredByTab.filter(a =>
+      a.message.toLowerCase().includes(q) || (a.type || '').toLowerCase().includes(q)
+    );
+  }, [filteredByTab, search]);
 
   return (
-    <AppShell title="Alerts" subtitle="Engineering health signals across all repositories" user={user!} alertCount={unresolved.length} onLogout={logout}>
-      <div style={{ display: 'flex', gap: 14, marginBottom: 22 }}>
+    <AppShell
+      title="Alerts"
+      subtitle="Engineering health signals across all repositories"
+      user={user!}
+      alertCount={unresolved.length}
+      onLogout={logout}
+      search={search}
+      onSearchChange={setSearch}
+      searchPlaceholder="Search alerts…"
+    >
+      <div className="leap-metric-row" style={{ display: 'flex', gap: 14, marginBottom: 22 }}>
         {(['critical', 'high', 'medium', 'low'] as const).map(level => (
-          <SeveritySummary key={level} level={level} count={alerts.filter(a => a.severity === level && !a.is_resolved).length} />
+          <SeveritySummary
+            key={level} level={level}
+            count={loading ? 0 : alerts.filter(a => a.severity === level && !a.is_resolved).length}
+          />
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 4, marginBottom: 18, borderBottom: `1px solid ${TOKENS.border}` }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 18, borderBottom: `1px solid ${TOKENS.border}`, flexWrap: 'wrap' }}>
         {([['open', 'Open', counts.open], ['resolved', 'Resolved', counts.resolved], ['all', 'All', counts.all]] as [TabKey, string, number][]).map(([k, label, n]) => {
           const isActive = tab === k;
           return (
-            <button key={k} onClick={() => setTab(k)} style={{
+            <button key={k} onClick={() => setTab(k)} aria-pressed={isActive} style={{
               padding: '9px 14px', background: 'transparent', border: 'none',
               borderBottom: `2px solid ${isActive ? TOKENS.accent : 'transparent'}`,
               color: isActive ? TOKENS.text : TOKENS.textDim,
@@ -159,12 +192,21 @@ export function AlertsPage() {
       </div>
 
       <div style={{ display: 'grid', gap: 12 }}>
-        {filtered.map(a => <AlertCard key={a.id} alert={a} onResolve={resolveAlert} />)}
-        {filtered.length === 0 && (
+        {loading ? (
+          <>
+            <Skeleton height={92} />
+            <Skeleton height={92} />
+            <Skeleton height={92} />
+          </>
+        ) : filtered.length === 0 ? (
           <div style={{ padding: 60, textAlign: 'center', background: TOKENS.bgElev, border: `1px solid ${TOKENS.border}`, borderRadius: 12, color: TOKENS.textDim, fontSize: 13 }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>✓</div>
+            <div aria-hidden style={{ fontSize: 28, marginBottom: 8 }}>✓</div>
             No alerts in this view.
           </div>
+        ) : (
+          filtered.map(a => (
+            <AlertCard key={a.id} alert={a} onResolve={resolveAlert} busy={resolvingId === a.id} />
+          ))
         )}
       </div>
     </AppShell>
