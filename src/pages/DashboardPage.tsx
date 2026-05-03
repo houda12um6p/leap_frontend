@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { TOKENS, FONT, FONT_MONO } from '../styles/tokens';
 import { AppShell } from '../components/layout/AppShell';
 import { Avatar } from '../components/ui/Avatar';
@@ -248,6 +249,69 @@ export function DashboardPage() {
         )}
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 14 }}>
+        <h2 style={{ margin: 0, fontFamily: FONT, fontSize: 14, color: TOKENS.text, fontWeight: 600, letterSpacing: -0.2 }}>Projects</h2>
+        <div style={{ flex: 1 }} />
+        <Link to="/projects" style={{ fontFamily: FONT_MONO, fontSize: 11, color: TOKENS.accent, textDecoration: 'none', letterSpacing: 0.4 }}>
+          All projects →
+        </Link>
+      </div>
+      {loading ? (
+        <div className="leap-dev-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
+          <Skeleton height={92} /><Skeleton height={92} /><Skeleton height={92} />
+        </div>
+      ) : projects.length === 0 ? (
+        <div style={{
+          padding: 32, textAlign: 'center',
+          background: TOKENS.bgElev, border: `1px solid ${TOKENS.border}`, borderRadius: 12,
+          color: TOKENS.textDim, fontFamily: FONT, fontSize: 13, marginBottom: 32,
+        }}>
+          No projects yet. <Link to="/projects" style={{ color: TOKENS.accent }}>Add one →</Link>
+        </div>
+      ) : (
+        <div className="leap-dev-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
+          {projects.slice(0, 6).map(p => {
+            const initials = (p.name.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('') || '?').toUpperCase();
+            const isActive = p.status === 'active';
+            return (
+              <Link
+                key={p.id}
+                to={`/projects/${p.id}`}
+                style={{
+                  background: TOKENS.bgElev,
+                  border: `1px solid ${TOKENS.border}`,
+                  borderRadius: 12, padding: 16,
+                  textDecoration: 'none', color: 'inherit',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = TOKENS.accent; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = TOKENS.border; }}
+              >
+                <div aria-hidden style={{
+                  width: 38, height: 38, borderRadius: 8,
+                  background: isActive ? TOKENS.accentSoft : 'rgba(255,255,255,0.06)',
+                  color: isActive ? TOKENS.accent : TOKENS.textDim,
+                  display: 'grid', placeItems: 'center',
+                  fontFamily: FONT_MONO, fontSize: 13, fontWeight: 700,
+                  border: `1px solid ${isActive ? 'rgba(0,168,107,0.3)' : TOKENS.border}`,
+                  flexShrink: 0,
+                }}>{initials}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, color: TOKENS.text, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {p.name}
+                  </div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: TOKENS.textDim, marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {p.repo_url}
+                  </div>
+                </div>
+                <span aria-hidden style={{ fontFamily: FONT_MONO, fontSize: 16, color: TOKENS.accent, flexShrink: 0 }}>→</span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
       <SectionHeader title="Developer Scores" />
       {loading ? (
         <div className="leap-dev-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
@@ -270,7 +334,18 @@ export function DashboardPage() {
         </div>
       )}
 
-      <SectionHeader title="Recent Alerts" caption={loading ? '' : `${unresolved.length} open · sorted by severity`} />
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 14 }}>
+        <h2 style={{ margin: 0, fontFamily: FONT, fontSize: 14, color: TOKENS.text, fontWeight: 600, letterSpacing: -0.2 }}>Recent Alerts</h2>
+        {!loading && (
+          <div style={{ fontSize: 11.5, color: TOKENS.textFaint, fontFamily: FONT_MONO, letterSpacing: 0.3 }}>
+            {unresolved.length} open · sorted by severity
+          </div>
+        )}
+        <div style={{ flex: 1 }} />
+        <Link to="/alerts" style={{ fontFamily: FONT_MONO, fontSize: 11, color: TOKENS.accent, textDecoration: 'none', letterSpacing: 0.4 }}>
+          View all alerts →
+        </Link>
+      </div>
       <div style={{ background: TOKENS.bgElev, border: `1px solid ${TOKENS.border}`, borderRadius: 12, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ padding: 16 }}>

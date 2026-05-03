@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { TOKENS, FONT, FONT_MONO } from '../styles/tokens';
 import { AppShell } from '../components/layout/AppShell';
 import { Field } from '../components/ui/Field';
@@ -46,28 +46,25 @@ function ScoreBar({ score }: { score: number }) {
   );
 }
 
-function ProjectRow({ p, alt, score, onSync, syncBusy, onOpen }: {
+function ProjectRow({ p, alt, score, onSync, syncBusy }: {
   p: Project; alt: boolean; score: number;
   onSync: (p: Project) => void; syncBusy: boolean;
-  onOpen: (p: Project) => void;
 }) {
   const [hover, setHover] = useState(false);
   const initials = (p.name.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('') || '?').toUpperCase();
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onOpen(p)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(p); } }}
+    <Link
+      to={`/projects/${p.id}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       className="leap-projects-row"
       style={{
-        display: 'grid', gridTemplateColumns: '2fr 1fr 1.4fr 2fr 110px',
+        display: 'grid', gridTemplateColumns: '2fr 1fr 1.4fr 2fr 160px',
         padding: '14px 22px',
         background: hover ? 'rgba(0,168,107,0.05)' : (alt ? TOKENS.bgElev2 : TOKENS.bgElev),
         borderTop: `1px solid ${TOKENS.border}`,
         alignItems: 'center', transition: 'background 0.12s', cursor: 'pointer',
+        textDecoration: 'none', color: 'inherit',
       }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div aria-hidden style={{
@@ -87,7 +84,8 @@ function ProjectRow({ p, alt, score, onSync, syncBusy, onOpen }: {
       </div>
       <div style={{ textAlign: 'right', display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
         <button
-          onClick={(e) => { e.stopPropagation(); onSync(p); }}
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSync(p); }}
           disabled={syncBusy}
           aria-busy={syncBusy || undefined}
           aria-label={`Sync ${p.name} from GitHub and Jira`}
@@ -104,9 +102,17 @@ function ProjectRow({ p, alt, score, onSync, syncBusy, onOpen }: {
           {syncBusy && <span className="leap-spinner" aria-hidden style={{ color: TOKENS.accent }} />}
           {syncBusy ? 'Syncing…' : 'Sync'}
         </button>
-        <span aria-hidden style={{ fontFamily: FONT_MONO, fontSize: 16, color: hover ? TOKENS.accent : TOKENS.textFaint }}>→</span>
+        <span style={{
+          padding: '4px 10px',
+          background: hover ? TOKENS.accent : 'transparent',
+          color: hover ? '#03130A' : TOKENS.accent,
+          border: `1px solid ${TOKENS.accent}`, borderRadius: 6,
+          fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600,
+          letterSpacing: 0.6, textTransform: 'uppercase',
+          transition: 'all 0.12s',
+        }}>Open →</span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -163,7 +169,6 @@ function AddProjectModal({ onCancel, onSubmit, busy }: { onCancel: () => void; o
 
 export function ProjectsPage() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const toast = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectScores, setProjectScores] = useState<Record<string, number>>({});
@@ -313,7 +318,7 @@ export function ProjectsPage() {
 
       <div style={{ background: TOKENS.bgElev, border: `1px solid ${TOKENS.border}`, borderRadius: 12, overflow: 'hidden' }}>
         <div className="leap-projects-head" style={{
-          display: 'grid', gridTemplateColumns: '2fr 1fr 1.4fr 2fr 110px',
+          display: 'grid', gridTemplateColumns: '2fr 1fr 1.4fr 2fr 160px',
           padding: '12px 22px', borderBottom: `1px solid ${TOKENS.border}`,
           fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint,
           letterSpacing: 1, textTransform: 'uppercase', background: 'rgba(0,0,0,0.18)',
@@ -346,7 +351,6 @@ export function ProjectsPage() {
               score={projectScores[p.id] || 0}
               onSync={handleSync}
               syncBusy={syncingId === p.id}
-              onOpen={(proj) => navigate(`/projects/${proj.id}`)}
             />
           ))
         )}
