@@ -46,6 +46,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 function DeveloperCard({ dev }: { dev: DeveloperScore }) {
   const [hover, setHover] = useState(false);
   const score = Math.round(dev.total_score || 0);
+  const hasRange = dev.min_score != null && dev.max_score != null && dev.merge_request_count > 1;
   return (
     <div
       onMouseEnter={() => setHover(true)}
@@ -79,8 +80,11 @@ function DeveloperCard({ dev }: { dev: DeveloperScore }) {
           </div>
         </div>
         <div style={{ flex: 1, display: 'grid', gap: 8 }}>
-          <Stat label="Score" value={score} />
-          <Stat label="PRs"   value={dev.merge_request_count || 0} />
+          <Stat label="Avg score" value={score} />
+          <Stat label="PRs"       value={dev.merge_request_count || 0} />
+          {hasRange && (
+            <Stat label="Range"   value={`${Math.round(dev.min_score!)}–${Math.round(dev.max_score!)}`} />
+          )}
         </div>
       </div>
     </div>

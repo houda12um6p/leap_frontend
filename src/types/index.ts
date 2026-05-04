@@ -29,8 +29,26 @@ export interface DeveloperScore {
   user_id: string;
   name: string;
   email: string;
-  total_score: number;
+  total_score: number; // mean of this dev's MR scores (0..1000)
+  min_score?: number;
+  max_score?: number;
   merge_request_count: number;
+}
+
+export interface ScoreBreakdownMR {
+  id: string;
+  title: string;
+  score: number;
+  lines_modified: number;
+  jira_linked: boolean;
+}
+
+export interface ScoreBreakdown {
+  scored_mr_count: number;
+  min_mr_score: number;
+  max_mr_score: number;
+  jira_linked_count: number;
+  lowest_mrs: ScoreBreakdownMR[];
 }
 
 export interface ProjectOverview {
@@ -41,6 +59,8 @@ export interface ProjectOverview {
   total_commits: number;
   unresolved_alerts: number;
   total_contributors: number;
+  project_score: number;
+  score_breakdown: ScoreBreakdown;
 }
 
 export interface JiraTask {

@@ -30,6 +30,149 @@ function MetricTile({ label, value, sub, accent }: { label: string; value: strin
   );
 }
 
+function ScoreBreakdownPanel({
+  overview, mrs, navigate,
+}: {
+  overview: ProjectOverview;
+  mrs: MergeRequestSummary[];
+  navigate: (to: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const bd = overview.score_breakdown;
+  const scored = bd?.scored_mr_count || 0;
+  const score = Math.round(overview.project_score || 0);
+  const total = overview.total_merge_requests || 0;
+  const linkedById = new Map(mrs.map(m => [m.id, m]));
+
+  return (
+    <div style={{
+      background: TOKENS.bgElev, border: `1px solid ${TOKENS.border}`,
+      borderRadius: 12, padding: '14px 18px', marginBottom: 24,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{
+          fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint,
+          textTransform: 'uppercase', letterSpacing: 0.8, minWidth: 110,
+        }}>
+          Project score
+        </div>
+        <div style={{
+          fontFamily: FONT, fontSize: 22, color: TOKENS.accent,
+          fontWeight: 700, letterSpacing: -0.5,
+        }}>
+          {scored ? score : '—'}
+          <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: TOKENS.textFaint, fontWeight: 500, marginLeft: 6 }}>/ 1000</span>
+        </div>
+        <div style={{ flex: 1, fontSize: 12, color: TOKENS.textDim }}>
+          {scored
+            ? <>mean of {scored} MR score{scored === 1 ? '' : 's'}{scored < total ? ` (${total - scored} not yet scored)` : ''}{bd && bd.jira_linked_count > 0 ? ` · ${bd.jira_linked_count} linked to Jira` : ''}</>
+            : <>no MR scores yet — click <em>Sync now</em> to populate</>}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          aria-expanded={open}
+          style={{
+            background: 'transparent', border: `1px solid ${TOKENS.border}`,
+            color: TOKENS.textDim, borderRadius: 8, padding: '6px 12px',
+            fontFamily: FONT_MONO, fontSize: 11, cursor: 'pointer',
+          }}
+        >
+          {open ? 'Hide breakdown' : 'How is this calculated?'}
+        </button>
+      </div>
+
+      {open && (
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${TOKENS.border}`, display: 'grid', gap: 12 }}>
+          <div style={{ fontSize: 12.5, color: TOKENS.textDim, lineHeight: 1.55 }}>
+            <strong style={{ color: TOKENS.text }}>Project score = mean of every MR's score</strong>, where each MR is scored
+            on a 0–1000 scale. Each MR starts at 1000 and is penalized by review-comment severity, normalized for PR size, with an
+            allowance from its linked Jira story points.
+          </div>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 12, color: TOKENS.text,
+            background: TOKENS.bg, border: `1px solid ${TOKENS.border}`,
+            borderRadius: 8, padding: '10px 14px', overflowX: 'auto',
+          }}>
+            score = 1000 · exp(-0.07 · max(0, X / √(1+L) − Δ))
+            <div style={{ fontSize: 11, color: TOKENS.textFaint, marginTop: 4, lineHeight: 1.5 }}>
+              X = Σ severity_weight of review comments · L = lines modified · Δ = Jira story points
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 110 }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint, letterSpacing: 0.6 }}>SCORED MRs</div>
+              <div style={{ fontFamily: FONT, fontSize: 18, color: TOKENS.text, fontWeight: 600, marginTop: 3 }}>{scored} / {total}</div>
+            </div>
+            <div style={{ flex: 1, minWidth: 110 }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint, letterSpacing: 0.6 }}>HIGHEST MR</div>
+              <div style={{ fontFamily: FONT, fontSize: 18, color: TOKENS.accent, fontWeight: 600, marginTop: 3 }}>
+                {scored ? Math.round(bd!.max_mr_score) : '—'}
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 110 }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint, letterSpacing: 0.6 }}>LOWEST MR</div>
+              <div style={{ fontFamily: FONT, fontSize: 18, color: TOKENS.warn, fontWeight: 600, marginTop: 3 }}>
+                {scored ? Math.round(bd!.min_mr_score) : '—'}
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 110 }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint, letterSpacing: 0.6 }}>JIRA-LINKED</div>
+              <div style={{ fontFamily: FONT, fontSize: 18, color: TOKENS.text, fontWeight: 600, marginTop: 3 }}>
+                {bd?.jira_linked_count ?? 0} / {total}
+              </div>
+            </div>
+          </div>
+
+          {bd && bd.lowest_mrs.length > 0 && (
+            <div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint, letterSpacing: 0.6, marginBottom: 8 }}>
+                LOWEST-SCORING MRs (drag the project average down most)
+              </div>
+              <div style={{ display: 'grid', gap: 6 }}>
+                {bd.lowest_mrs.map(m => {
+                  const summary = linkedById.get(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => navigate(`/merge-requests/${m.id}`)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        background: TOKENS.bg, border: `1px solid ${TOKENS.border}`,
+                        borderRadius: 8, padding: '8px 12px', textAlign: 'left',
+                        cursor: 'pointer', color: TOKENS.text, fontFamily: FONT,
+                      }}
+                    >
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: TOKENS.warn, fontWeight: 600, minWidth: 40 }}>
+                        {Math.round(m.score)}
+                      </span>
+                      <span style={{ flex: 1, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {m.title}
+                      </span>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: TOKENS.textFaint }}>
+                        {m.lines_modified} lines
+                      </span>
+                      {m.jira_linked
+                        ? <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.accent, padding: '1px 6px', border: `1px solid ${TOKENS.accent}40`, borderRadius: 4 }}>JIRA</span>
+                        : <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: TOKENS.textFaint, padding: '1px 6px', border: `1px solid ${TOKENS.border}`, borderRadius: 4 }}>NO JIRA</span>}
+                      {summary && (
+                        <MRStatusPill status={summary.status} />
+                      )}
+                      <span aria-hidden style={{ color: TOKENS.textFaint, fontFamily: FONT_MONO }}>→</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MRStatusPill({ status }: { status: string }) {
   const map: Record<string, { c: string; bg: string }> = {
     open:   { c: TOKENS.accent, bg: TOKENS.accentSoft },
@@ -217,8 +360,11 @@ export function ProjectDetailPage() {
     }
     setSyncing(true);
     try {
+      // Jira FIRST: github_service matches PR titles like "LEAP-101" against
+      // existing JiraTask rows. If we sync GitHub first on a fresh project,
+      // no JiraTask rows exist yet and the link is silently skipped.
+      try { await syncJiraTasks(project.id); } catch (e) { console.warn('Jira sync failed (continuing)', e); }
       await syncGitHub(parsed.owner, parsed.repo, project.id);
-      try { await syncJiraTasks(project.id); } catch (e) { console.warn('Jira sync failed', e); }
       try { await calculateProjectScores(project.id); } catch (e) { console.warn('Score recalc failed', e); }
       const [ovRes, mrsRes] = await Promise.allSettled([
         getOverview(project.id),
@@ -328,13 +474,25 @@ export function ProjectDetailPage() {
         </div>
       )}
     >
-      <div className="leap-metric-row" style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
+      <div className="leap-metric-row" style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
+        <MetricTile
+          label="Project score"
+          value={loading ? '—' : (overview?.project_score != null ? Math.round(overview.project_score) : '—')}
+          sub={overview && overview.score_breakdown.scored_mr_count > 0
+            ? `mean of ${overview.score_breakdown.scored_mr_count} MR${overview.score_breakdown.scored_mr_count === 1 ? '' : 's'} · /1000`
+            : 'no MR scores yet'}
+          accent={TOKENS.accent}
+        />
         <MetricTile label="Total MRs"        value={loading ? '—' : (overview?.total_merge_requests ?? mrs.length)} />
         <MetricTile label="Open MRs"         value={loading ? '—' : (overview?.open_merge_requests ?? mrs.filter(m => m.status === 'open').length)} accent={TOKENS.accent} />
         <MetricTile label="Total commits"    value={loading ? '—' : (overview?.total_commits ?? '—')} />
         <MetricTile label="Open alerts"      value={loading ? '—' : unresolved.length} accent={unresolved.length > 0 ? TOKENS.warn : TOKENS.text} />
         <MetricTile label="Contributors"     value={loading ? '—' : (overview?.total_contributors ?? '—')} accent={TOKENS.accent} />
       </div>
+
+      {!loading && overview && (
+        <ScoreBreakdownPanel overview={overview} mrs={mrs} navigate={navigate} />
+      )}
 
       <div style={{ display: 'flex', gap: 4, marginBottom: 18, borderBottom: `1px solid ${TOKENS.border}` }}>
         {(['mrs', 'alerts'] as const).map(k => {
