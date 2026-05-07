@@ -41,12 +41,12 @@ function variantStyle(v: Variant): React.CSSProperties {
     case 'primary':
       return {
         background:
-          'linear-gradient(180deg, rgba(94, 234, 212, 0.95) 0%, rgba(45, 212, 191, 0.95) 100%)',
-        color: '#03241f',
+          'linear-gradient(180deg, var(--leap-accent-cyan) 0%, color-mix(in srgb, var(--leap-accent-cyan) 80%, black) 100%)',
+        color: 'var(--leap-bg-deep)',
         borderRadius: 999,
-        borderColor: 'rgba(94, 234, 212, 0.6)',
+        borderColor: 'color-mix(in srgb, var(--leap-accent-cyan) 60%, transparent)',
         boxShadow:
-          '0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 26px rgba(45, 212, 191, 0.18)',
+          '0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 8px 26px color-mix(in srgb, var(--leap-accent-cyan) 22%, transparent)',
       };
     case 'ghost':
       return {
@@ -57,7 +57,7 @@ function variantStyle(v: Variant): React.CSSProperties {
       };
     case 'glass':
       return {
-        background: 'rgba(10, 14, 24, 0.55)',
+        background: 'var(--leap-card-bg)',
         color: 'var(--leap-text)',
         borderRadius: 999,
         borderColor: 'var(--leap-border)',
@@ -66,7 +66,7 @@ function variantStyle(v: Variant): React.CSSProperties {
       };
     case 'sharp':
       return {
-        background: 'rgba(255, 255, 255, 0.04)',
+        background: 'var(--leap-card-bg-muted)',
         color: 'var(--leap-text)',
         borderRadius: 6,
         borderColor: 'var(--leap-border)',

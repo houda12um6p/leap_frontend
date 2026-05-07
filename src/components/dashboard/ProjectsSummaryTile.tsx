@@ -60,15 +60,15 @@ export function ProjectsSummaryTile({ rows }: Props) {
                 padding: 14,
                 borderRadius: 12,
                 border: '1px solid var(--leap-border-soft)',
-                background: 'rgba(255,255,255,0.025)',
+                background: 'var(--leap-surface-soft)',
                 transition: 'background 200ms, border-color 200ms, transform 240ms',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.background = 'var(--leap-surface-wash)';
                 e.currentTarget.style.borderColor = 'var(--leap-border)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.025)';
+                e.currentTarget.style.background = 'var(--leap-surface-soft)';
                 e.currentTarget.style.borderColor = 'var(--leap-border-soft)';
               }}
             >

@@ -10,7 +10,7 @@ const inputStyle: React.CSSProperties = {
   padding: '12px 14px',
   borderRadius: 10,
   border: '1px solid var(--leap-border)',
-  background: 'rgba(8, 12, 22, 0.55)',
+  background: 'var(--leap-card-bg)',
   color: 'var(--leap-text)',
   fontFamily: "'Geist', system-ui",
   fontSize: 14,

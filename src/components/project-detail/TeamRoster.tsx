@@ -1,7 +1,7 @@
 import React from 'react';
 import { CardShell } from '../dashboard/CardShell';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
-import { DeveloperScore, scoreBand } from '../../lib/types';
+import { DeveloperScore, scoreBand, avgScore } from '../../lib/types';
 
 interface Props {
   developers: DeveloperScore[];
@@ -45,19 +45,20 @@ export function TeamRoster({ developers }: Props) {
 
       <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {sorted.map((d) => {
-          const tone = scoreBand(d.total_score);
+          const avg = avgScore(d);              // tone band uses per-MR average (0..1000)
+          const tone = scoreBand(avg);
           const initials = d.name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
-          const pct = Math.max(2, Math.min(100, (d.total_score / 1000) * 100));
+          const pct = Math.max(2, Math.min(100, (avg / 1000) * 100));
           return (
             <li key={d.user_id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{
                 width: 36, height: 36, borderRadius: 999,
                 display: 'grid', placeItems: 'center',
-                background: `linear-gradient(135deg, ${tone.tone}33, ${tone.tone}11)`,
+                background: `linear-gradient(135deg, ${tone.soft}, ${tone.faint})`,
                 color: tone.tone,
                 fontFamily: "'Geist Mono', monospace",
                 fontSize: 12, fontWeight: 600,
-                border: `1px solid ${tone.tone}33`,
+                border: `1px solid ${tone.soft}`,
                 flex: '0 0 auto',
               }}>
                 {initials}
@@ -74,13 +75,13 @@ export function TeamRoster({ developers }: Props) {
                 <div style={{
                   marginTop: 4,
                   height: 4, borderRadius: 4,
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'var(--leap-surface-wash)',
                   overflow: 'hidden',
                 }}>
                   <div style={{
                     width: `${pct}%`,
                     height: '100%',
-                    background: `linear-gradient(90deg, ${tone.tone}, ${tone.tone}55)`,
+                    background: `linear-gradient(90deg, ${tone.tone}, ${tone.soft})`,
                   }} />
                 </div>
               </div>
@@ -99,7 +100,7 @@ export function TeamRoster({ developers }: Props) {
                   fontSize: 9.5, color: 'var(--leap-text-faint)',
                   letterSpacing: '0.10em',
                 }}>
-                  {d.merge_request_count} MRs
+                  {d.merge_request_count} MRs · avg {Math.round(avg)}
                 </div>
               </div>
             </li>

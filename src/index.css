@@ -18,8 +18,25 @@
   --leap-skeleton-mid: rgba(255, 255, 255, 0.10);
   --leap-skeleton-end: rgba(255, 255, 255, 0.04);
   --leap-vignette:     rgba(0, 0, 0, 0.6);
-  --leap-accent-cyan:  #5eead4;
-  --leap-accent-amber: #fbbf24;
+  --leap-surface-soft:  rgba(255, 255, 255, 0.025);
+  --leap-surface-wash:  rgba(255, 255, 255, 0.04);
+  --leap-accent-cyan:   #5eead4;
+  --leap-accent-amber:  #fbbf24;
+  --leap-accent-purple: #a78bfa;
+  --leap-accent-warn:   #f87171;
+
+  --leap-band-exceptional:        #5eead4;
+  --leap-band-exceptional-soft:   rgba(94, 234, 212, 0.20);
+  --leap-band-exceptional-faint:  rgba(94, 234, 212, 0.10);
+  --leap-band-strong:             #a7f3d0;
+  --leap-band-strong-soft:        rgba(167, 243, 208, 0.20);
+  --leap-band-strong-faint:       rgba(167, 243, 208, 0.10);
+  --leap-band-steady:             #fbbf24;
+  --leap-band-steady-soft:        rgba(251, 191, 36, 0.20);
+  --leap-band-steady-faint:       rgba(251, 191, 36, 0.10);
+  --leap-band-warn:               #f87171;
+  --leap-band-warn-soft:          rgba(248, 113, 113, 0.20);
+  --leap-band-warn-faint:         rgba(248, 113, 113, 0.10);
 
   color-scheme: dark;
 }
@@ -39,8 +56,25 @@
   --leap-skeleton-mid: rgba(10, 22, 40, 0.10);
   --leap-skeleton-end: rgba(10, 22, 40, 0.04);
   --leap-vignette:     rgba(10, 22, 40, 0.18);
-  --leap-accent-cyan:  #0d8050;
-  --leap-accent-amber: #c2410c;
+  --leap-surface-soft:  rgba(10, 22, 40, 0.035);
+  --leap-surface-wash:  rgba(10, 22, 40, 0.06);
+  --leap-accent-cyan:   #0d8050;
+  --leap-accent-amber:  #c2410c;
+  --leap-accent-purple: #6d28d9;
+  --leap-accent-warn:   #b91c1c;
+
+  --leap-band-exceptional:        #0d8050;
+  --leap-band-exceptional-soft:   rgba(13, 128, 80, 0.16);
+  --leap-band-exceptional-faint:  rgba(13, 128, 80, 0.08);
+  --leap-band-strong:             #047857;
+  --leap-band-strong-soft:        rgba(4, 120, 87, 0.16);
+  --leap-band-strong-faint:       rgba(4, 120, 87, 0.08);
+  --leap-band-steady:             #b45309;
+  --leap-band-steady-soft:        rgba(180, 83, 9, 0.14);
+  --leap-band-steady-faint:       rgba(180, 83, 9, 0.07);
+  --leap-band-warn:               #b91c1c;
+  --leap-band-warn-soft:          rgba(185, 28, 28, 0.14);
+  --leap-band-warn-faint:         rgba(185, 28, 28, 0.07);
 
   color-scheme: light;
 }
@@ -164,7 +198,7 @@ button {
   line-height: 0.92;
   letter-spacing: -0.05em;
   margin: 0;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.55) 100%);
+  background: linear-gradient(180deg, var(--leap-text) 0%, var(--leap-text-dim) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -174,7 +208,7 @@ button {
   font-family: 'Instrument Serif', 'Geist', serif;
   font-style: italic;
   font-weight: 400;
-  background: linear-gradient(180deg, #5eead4 0%, #99f6e4 100%);
+  background: linear-gradient(180deg, var(--leap-accent-cyan) 0%, var(--leap-accent-amber) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -436,7 +470,7 @@ button {
   font-size: clamp(36px, 5vw, 64px);
   letter-spacing: -0.04em;
   line-height: 1.0;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.55) 100%);
+  background: linear-gradient(180deg, var(--leap-text) 0%, var(--leap-text-dim) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -445,7 +479,7 @@ button {
   font-family: 'Instrument Serif', serif;
   font-style: italic;
   font-weight: 400;
-  background: linear-gradient(180deg, #5eead4 0%, #99f6e4 100%);
+  background: linear-gradient(180deg, var(--leap-accent-cyan) 0%, var(--leap-accent-amber) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -697,12 +731,18 @@ button {
 }
 [data-theme='light'] .leap-modal-backdrop { background: rgba(10, 22, 40, 0.28); }
 
-.leap-modal {
+.leap-modal-wrap {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   z-index: 91;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.leap-modal {
+  pointer-events: auto;
   padding: 26px 28px 26px;
   border-radius: 18px;
   border: 1px solid var(--leap-border);

@@ -52,7 +52,7 @@ export function JiraPanel({ tasks }: Props) {
               padding: 12,
               borderRadius: 12,
               border: '1px solid var(--leap-border-soft)',
-              background: 'rgba(255,255,255,0.018)',
+              background: 'var(--leap-surface-soft)',
               minHeight: 120,
             }}
           >
@@ -79,7 +79,7 @@ export function JiraPanel({ tasks }: Props) {
                 style={{
                   padding: '10px 12px',
                   borderRadius: 10,
-                  background: 'rgba(255,255,255,0.03)',
+                  background: 'var(--leap-surface-soft)',
                   border: '1px solid var(--leap-border-soft)',
                   display: 'flex', flexDirection: 'column', gap: 6,
                 }}
@@ -89,7 +89,7 @@ export function JiraPanel({ tasks }: Props) {
                     fontFamily: "'Geist Mono', monospace",
                     fontSize: 10, letterSpacing: '0.10em',
                     color: 'var(--leap-text-dim)',
-                    background: 'rgba(255,255,255,0.04)',
+                    background: 'var(--leap-surface-wash)',
                     border: '1px solid var(--leap-border)',
                     padding: '1px 6px',
                     borderRadius: 3,

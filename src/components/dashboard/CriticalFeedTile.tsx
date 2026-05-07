@@ -41,15 +41,15 @@ export function CriticalFeedTile({ prs }: Props) {
                   padding: '10px 12px',
                   borderRadius: 12,
                   border: '1px solid var(--leap-border-soft)',
-                  background: 'rgba(255,255,255,0.02)',
+                  background: 'var(--leap-surface-soft)',
                   transition: 'background 200ms ease, border-color 200ms ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                  e.currentTarget.style.background = 'var(--leap-surface-wash)';
                   e.currentTarget.style.borderColor = 'var(--leap-border)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                  e.currentTarget.style.background = 'var(--leap-surface-soft)';
                   e.currentTarget.style.borderColor = 'var(--leap-border-soft)';
                 }}
               >
@@ -67,9 +67,27 @@ export function CriticalFeedTile({ prs }: Props) {
                     fontFamily: "'Geist Mono', monospace",
                     fontSize: 10, color: 'var(--leap-text-faint)',
                     letterSpacing: '0.08em',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    flexWrap: 'wrap',
                   }}>
-                    <GitBranchIcon size={10} style={{ verticalAlign: '-1px', marginRight: 6 }} />
-                    {pr.project_name ?? pr.project_id} · {pr.author_name ?? 'unknown'}
+                    <span>
+                      <GitBranchIcon size={10} style={{ verticalAlign: '-1px', marginRight: 6 }} />
+                      {pr.project_name ?? pr.project_id} · {pr.author_name ?? 'unknown'}
+                    </span>
+                    {pr.jira_key && (
+                      <span style={{
+                        padding: '1px 6px',
+                        borderRadius: 4,
+                        border: '1px solid var(--leap-border)',
+                        background: 'rgba(94, 234, 212, 0.08)',
+                        color: 'var(--leap-accent-cyan)',
+                        letterSpacing: '0.10em',
+                      }}>
+                        {pr.jira_key}
+                      </span>
+                    )}
                   </span>
                 </span>
               </Link>

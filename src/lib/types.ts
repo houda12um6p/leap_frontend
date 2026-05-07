@@ -15,10 +15,20 @@ export interface DeveloperScore {
   user_id: string;
   name: string;
   email: string;
-  total_score: number;        // 0–1000, mean of merge-request scores for this project
+  /**
+   * SUM of this developer's merge-request scores within the project (0..1000 per MR,
+   * so total_score can exceed 1000 for high-volume contributors). The mean is
+   * derived as total_score / merge_request_count for tone-coding.
+   */
+  total_score: number;
   min_score?: number;
   max_score?: number;
   merge_request_count: number;
+}
+
+/** Average MR score for tone-banding when total_score is a sum. */
+export function avgScore(d: { total_score: number; merge_request_count: number }): number {
+  return d.merge_request_count > 0 ? d.total_score / d.merge_request_count : 0;
 }
 
 export interface MergeRequestSummary {
@@ -35,6 +45,7 @@ export interface MergeRequestSummary {
   author_email: string | null;
   project_id: string;
   jira_task_id: string | null;
+  jira_key: string | null;    // human-readable key (e.g. "OCPS-214"), surfaced inline by the backend
   created_at: string | null;
   updated_at: string | null;
 }
@@ -111,10 +122,39 @@ export function severityColor(s: Severity): string {
   return s === 0 ? '#94a3b8' : s === 1 ? '#facc15' : s === 3 ? '#fb923c' : '#f87171';
 }
 
-/** Map a score value back into a severity-feel band for tone-coding the UI. */
-export function scoreBand(score: number): { tone: string; label: string } {
-  if (score >= 850) return { tone: '#5eead4', label: 'Exceptional'   };
-  if (score >= 700) return { tone: '#a7f3d0', label: 'Strong'        };
-  if (score >= 500) return { tone: '#fbbf24', label: 'Steady'        };
-  return                  { tone: '#f87171', label: 'Needs review'  };
+/** Tone bundle for a score band — tone for solid text, soft (~20%) for backgrounds,
+ *  faint (~10%) for the most subtle washes. All driven through CSS variables so
+ *  switching theme automatically switches the palette. */
+export interface ScoreTone {
+  tone:  string;
+  soft:  string;
+  faint: string;
+  label: string;
+}
+
+export function scoreBand(score: number): ScoreTone {
+  if (score >= 850) return {
+    tone:  'var(--leap-band-exceptional)',
+    soft:  'var(--leap-band-exceptional-soft)',
+    faint: 'var(--leap-band-exceptional-faint)',
+    label: 'Exceptional',
+  };
+  if (score >= 700) return {
+    tone:  'var(--leap-band-strong)',
+    soft:  'var(--leap-band-strong-soft)',
+    faint: 'var(--leap-band-strong-faint)',
+    label: 'Strong',
+  };
+  if (score >= 500) return {
+    tone:  'var(--leap-band-steady)',
+    soft:  'var(--leap-band-steady-soft)',
+    faint: 'var(--leap-band-steady-faint)',
+    label: 'Steady',
+  };
+  return {
+    tone:  'var(--leap-band-warn)',
+    soft:  'var(--leap-band-warn-soft)',
+    faint: 'var(--leap-band-warn-faint)',
+    label: 'Needs review',
+  };
 }

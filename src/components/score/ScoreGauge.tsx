@@ -38,7 +38,7 @@ export function ScoreGauge({ score, size = 220, strokeWidth = 12 }: Props) {
       <path
         d={`M ${start.x} ${start.y} A ${radius} ${radius} 0 0 1 ${end.x} ${end.y}`}
         fill="none"
-        stroke="rgba(255,255,255,0.06)"
+        stroke="var(--leap-surface-wash)"
         strokeWidth={strokeWidth}
         strokeLinecap="round"
       />

@@ -37,7 +37,7 @@ export function PRLedger({ prs }: Props) {
               style={{
                 borderRadius: 14,
                 border: `1px solid ${open ? 'var(--leap-border)' : 'var(--leap-border-soft)'}`,
-                background: open ? 'rgba(8,12,22,0.55)' : 'rgba(255,255,255,0.02)',
+                background: open ? 'var(--leap-card-bg)' : 'var(--leap-surface-soft)',
                 overflow: 'hidden',
               }}
             >
@@ -58,7 +58,7 @@ export function PRLedger({ prs }: Props) {
                   color: 'inherit',
                   transition: 'background 200ms',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--leap-surface-soft)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 {/* score chip */}
@@ -67,8 +67,8 @@ export function PRLedger({ prs }: Props) {
                   gap: 4,
                   padding: '4px 10px',
                   borderRadius: 999,
-                  background: `${tone.tone}1a`,
-                  border: `1px solid ${tone.tone}33`,
+                  background: tone.faint,
+                  border: `1px solid ${tone.soft}`,
                   color: tone.tone,
                 }}>
                   <span style={{
@@ -88,14 +88,29 @@ export function PRLedger({ prs }: Props) {
                   </span>
                 </span>
 
-                {/* mr id */}
+                {/* mr id + jira key */}
                 <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
                   fontFamily: "'Geist Mono', monospace",
                   fontSize: 11, color: 'var(--leap-text-faint)',
                   letterSpacing: '0.10em',
                   whiteSpace: 'nowrap',
                 }}>
                   #{pr.github_id ?? pr.id.slice(0, 5)}
+                  {pr.jira_key && (
+                    <span style={{
+                      padding: '1px 6px',
+                      borderRadius: 4,
+                      border: '1px solid var(--leap-border)',
+                      background: 'rgba(94, 234, 212, 0.08)',
+                      color: 'var(--leap-accent-cyan)',
+                      letterSpacing: '0.10em',
+                    }}>
+                      {pr.jira_key}
+                    </span>
+                  )}
                 </span>
 
                 {/* title */}

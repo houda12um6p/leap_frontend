@@ -24,7 +24,7 @@ export function SeveritySegments({ counts, size = 'md' }: Props) {
         height: h,
         borderRadius: h,
         overflow: 'hidden',
-        background: 'rgba(255,255,255,0.03)',
+        background: 'var(--leap-surface-soft)',
         border: '1px solid var(--leap-border-soft)',
       }}>
         {ORDER.map((sev) => {

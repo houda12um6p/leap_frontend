@@ -28,7 +28,7 @@ export function ProjectCard({
       style={{
         padding: 24,
         opacity: archived ? 0.55 : 1,
-        boxShadow: `0 0 0 1px ${tone.tone}11, 0 18px 48px ${tone.tone}10`,
+        boxShadow: `0 0 0 1px ${tone.soft}, 0 18px 48px ${tone.faint}`,
       }}
     >
       <Link
@@ -40,14 +40,13 @@ export function ProjectCard({
         }}
         aria-label={`Open ${project.name}`}
       />
-      {/* glow accent */}
       <div
         aria-hidden
         style={{
           position: 'absolute',
           inset: -1,
           borderRadius: 'inherit',
-          background: `radial-gradient(220px 160px at 12% 0%, ${tone.tone}1f, transparent 70%)`,
+          background: `radial-gradient(220px 160px at 12% 0%, ${tone.faint}, transparent 70%)`,
           pointerEvents: 'none',
         }}
       />
@@ -57,8 +56,8 @@ export function ProjectCard({
           style={{
             display: 'inline-block',
             width: 8, height: 8, borderRadius: 2,
-            background: `linear-gradient(135deg, ${tone.tone}, #fbbf24)`,
-            boxShadow: `0 0 12px ${tone.tone}66`,
+            background: `linear-gradient(135deg, ${tone.tone}, var(--leap-accent-amber))`,
+            boxShadow: `0 0 12px ${tone.soft}`,
           }}
         />
         <Pill color={archived ? '#94a3b8' : tone.tone} tone="soft">
@@ -138,7 +137,7 @@ export function ProjectCard({
             fontFamily: "'Geist', system-ui",
             fontSize: 26, fontWeight: 500,
             letterSpacing: '-0.025em',
-            background: `linear-gradient(180deg, #ffffff 0%, ${tone.tone} 130%)`,
+            background: `linear-gradient(180deg, var(--leap-text) 0%, ${tone.tone} 130%)`,
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             color: 'transparent',

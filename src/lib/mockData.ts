@@ -178,6 +178,7 @@ function makeSummary(s: MRSeed, projectId: string): MergeRequestSummary {
     author_email: u.email,
     project_id: projectId,
     jira_task_id: s.jira_key ? `jt-${s.jira_key}` : null,
+    jira_key: s.jira_key,
     created_at: s.created_at,
     updated_at: s.updated_at,
   };

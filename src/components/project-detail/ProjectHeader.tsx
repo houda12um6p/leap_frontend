@@ -5,6 +5,7 @@ import { Pill } from '../ui/Pill';
 import { ArrowLeftIcon, ExternalLinkIcon } from '../ui/Icon';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
 import { SyncMenu } from '../projects/SyncMenu';
+import { DeleteProjectButton } from '../projects/DeleteProjectButton';
 import { Project, ProjectOverview, scoreBand } from '../../lib/types';
 
 interface Props {
@@ -25,23 +26,29 @@ export function ProjectHeader({ project, overview }: Props) {
         marginBottom: 24,
         borderRadius: 22,
         border: '1px solid var(--leap-border)',
-        background: 'rgba(10, 14, 26, 0.62)',
+        background: 'var(--leap-card-bg)',
         backdropFilter: 'blur(18px) saturate(140%)',
         WebkitBackdropFilter: 'blur(18px) saturate(140%)',
-        overflow: 'hidden',
       }}
     >
-      {/* corner glow */}
       <div
         aria-hidden
         style={{
           position: 'absolute',
-          inset: -1,
+          inset: 0,
           borderRadius: 'inherit',
-          background: `radial-gradient(360px 200px at 0% 0%, ${tone.tone}1a, transparent 65%)`,
+          overflow: 'hidden',
           pointerEvents: 'none',
         }}
-      />
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: -1,
+            background: `radial-gradient(360px 200px at 0% 0%, ${tone.faint}, transparent 65%)`,
+          }}
+        />
+      </div>
 
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <Link
@@ -53,7 +60,7 @@ export function ProjectHeader({ project, overview }: Props) {
             padding: '6px 12px',
             borderRadius: 999,
             border: '1px solid var(--leap-border)',
-            background: 'rgba(255,255,255,0.025)',
+            background: 'var(--leap-surface-soft)',
             color: 'var(--leap-text-dim)',
             fontFamily: "'Geist Mono', monospace",
             fontSize: 10.5,
@@ -85,7 +92,8 @@ export function ProjectHeader({ project, overview }: Props) {
           <ExternalLinkIcon size={11} />
         </a>
 
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'inline-flex', gap: 8 }}>
+          <DeleteProjectButton projectId={project.id} projectName={project.name} />
           <SyncMenu projectId={project.id} repoUrl={project.repo_url} />
         </div>
       </div>
@@ -98,7 +106,7 @@ export function ProjectHeader({ project, overview }: Props) {
           fontWeight: 600,
           letterSpacing: '-0.04em',
           lineHeight: 1.0,
-          background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.55) 100%)',
+          background: 'linear-gradient(180deg, var(--leap-text) 0%, var(--leap-text-dim) 100%)',
           WebkitBackgroundClip: 'text',
           backgroundClip: 'text',
           color: 'transparent',
@@ -120,13 +128,13 @@ export function ProjectHeader({ project, overview }: Props) {
         <Stat label="Engineers"     value={overview?.total_contributors ?? 0} />
         <Stat label="Open MRs"      value={overview?.open_merge_requests ?? 0} />
         <Stat label="Total commits" value={overview?.total_commits ?? 0} />
-        <Stat label="Alerts"        value={overview?.unresolved_alerts ?? 0} accent={(overview?.unresolved_alerts ?? 0) > 0 ? '#f87171' : undefined} />
+        <Stat label="Alerts"        value={overview?.unresolved_alerts ?? 0} accent={(overview?.unresolved_alerts ?? 0) > 0 ? 'var(--leap-accent-warn)' : undefined} />
       </div>
     </motion.header>
   );
 }
 
-function Stat({ label, value, accent = '#ffffff' }: { label: string; value: number; accent?: string }) {
+function Stat({ label, value, accent }: { label: string; value: number; accent?: string }) {
   return (
     <div>
       <div style={{
@@ -143,7 +151,7 @@ function Stat({ label, value, accent = '#ffffff' }: { label: string; value: numb
           marginTop: 4,
           fontSize: 26, fontWeight: 500,
           letterSpacing: '-0.025em',
-          color: accent === '#ffffff' ? 'var(--leap-text)' : accent,
+          color: accent ?? 'var(--leap-text)',
         }}
       />
     </div>

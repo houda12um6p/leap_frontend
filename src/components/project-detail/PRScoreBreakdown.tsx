@@ -38,13 +38,16 @@ export function PRScoreBreakdown({ mrId }: Props) {
         padding: 22,
         borderRadius: 16,
         border: '1px solid var(--leap-border)',
-        background: 'rgba(8, 12, 22, 0.55)',
-        boxShadow: `0 0 0 1px ${tone.tone}11, 0 18px 48px ${tone.tone}10`,
+        background: 'var(--leap-card-bg)',
+        boxShadow: `0 0 0 1px ${tone.soft}, 0 18px 48px ${tone.faint}`,
       }}
     >
       {/* header row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Pill color={tone.tone}>{tone.label}</Pill>
+        {mr.jira_key && (
+          <Pill color="#5eead4" tone="outline">{mr.jira_key}</Pill>
+        )}
         <span style={{
           fontFamily: "'Geist Mono', monospace",
           fontSize: 10.5, color: 'var(--leap-text-faint)',
@@ -82,7 +85,7 @@ export function PRScoreBreakdown({ mrId }: Props) {
             padding: 16,
             borderRadius: 12,
             border: '1px solid var(--leap-border-soft)',
-            background: 'rgba(255,255,255,0.02)',
+            background: 'var(--leap-surface-soft)',
           }}>
             <div style={{
               display: 'flex',
@@ -130,7 +133,7 @@ export function PRScoreBreakdown({ mrId }: Props) {
           <div style={{
             fontSize: 36, fontWeight: 600,
             letterSpacing: '-0.04em',
-            background: `linear-gradient(180deg, #ffffff 0%, ${tone.tone} 130%)`,
+            background: `linear-gradient(180deg, var(--leap-text) 0%, ${tone.tone} 130%)`,
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             color: 'transparent',
@@ -170,7 +173,7 @@ export function PRScoreBreakdown({ mrId }: Props) {
                   padding: '10px 12px',
                   borderRadius: 10,
                   border: '1px solid var(--leap-border-soft)',
-                  background: 'rgba(255,255,255,0.02)',
+                  background: 'var(--leap-surface-soft)',
                 }}
               >
                 <Pill color={severityColor(c.severity_weight as Severity)}>
@@ -204,7 +207,7 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
       padding: 14,
       borderRadius: 10,
       border: '1px solid var(--leap-border-soft)',
-      background: 'rgba(255,255,255,0.02)',
+      background: 'var(--leap-surface-soft)',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 6,
@@ -233,7 +236,7 @@ function SkeletonBreakdown() {
       padding: 22, height: 280,
       borderRadius: 16,
       border: '1px solid var(--leap-border-soft)',
-      background: 'rgba(255,255,255,0.02)',
+      background: 'var(--leap-surface-soft)',
     }}>
       <div className="leap-skel" style={{ width: 120, height: 12, marginBottom: 14 }} />
       <div className="leap-skel" style={{ width: '60%',  height: 22 }} />

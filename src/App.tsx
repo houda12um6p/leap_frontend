@@ -4,6 +4,7 @@ import { useSnapshot } from 'valtio';
 import Background from './components/Background';
 import { SectionBar } from './components/dashboard/SectionBar';
 import { RequireAuth } from './components/auth/RequireAuth';
+import { UserMenu } from './components/auth/UserMenu';
 import { authState, bootstrapAuth, logout } from './lib/auth';
 
 const Welcome           = lazy(() => import('./pages/Welcome'));
@@ -63,6 +64,7 @@ function WithSectionBar({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      <UserMenu />
       <SectionBar />
     </>
   );

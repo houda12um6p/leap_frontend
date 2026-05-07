@@ -174,8 +174,43 @@ export function useCreateProject() {
   });
 }
 
+export function useDeleteProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (projectId: string) => {
+      await fetch(`${API_BASE}/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }).then((res) => {
+        if (res.status === 401) {
+          try { localStorage.removeItem('leap.token'); localStorage.removeItem('leap.user'); } catch {}
+          window.dispatchEvent(new Event('leap:logout'));
+          throw new Error('Session expired. Please sign in again.');
+        }
+        if (!res.ok && res.status !== 204) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+      });
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.removeQueries({ queryKey: ['project', projectId] });
+      qc.removeQueries({ queryKey: ['overview', projectId] });
+      qc.removeQueries({ queryKey: ['scores', projectId] });
+      qc.removeQueries({ queryKey: ['merge-requests', projectId] });
+      qc.removeQueries({ queryKey: ['jira', projectId] });
+    },
+  });
+}
+
 export interface SyncProjectKind {
-  kind: 'github-prs' | 'github-commits' | 'jira-tasks' | 'recalc-scores';
+  kind:
+    | 'github-prs'
+    | 'github-commits'
+    | 'github-review-comments'
+    | 'jira-tasks'
+    | 'recalc-scores';
   projectId: string;
   repo_owner?: string;
   repo_name?: string;
@@ -187,10 +222,11 @@ export function useSyncProject() {
     mutationFn: async (input: SyncProjectKind) => {
       const path = (() => {
         switch (input.kind) {
-          case 'github-prs':     return '/github/sync/pull-requests';
-          case 'github-commits': return '/github/sync/commits';
-          case 'jira-tasks':     return '/jira/sync/tasks';
-          case 'recalc-scores':  return `/scores/project/${input.projectId}/calculate`;
+          case 'github-prs':             return '/github/sync/pull-requests';
+          case 'github-commits':         return '/github/sync/commits';
+          case 'github-review-comments': return '/github/sync/review-comments';
+          case 'jira-tasks':             return '/jira/sync/tasks';
+          case 'recalc-scores':          return `/scores/project/${input.projectId}/calculate`;
         }
       })();
       const body =

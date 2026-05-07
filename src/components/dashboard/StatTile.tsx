@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function StatTile({
-  label, value, unit, hint, accent = '#5eead4', format,
+  label, value, unit, hint, accent = 'var(--leap-accent-cyan)', format,
 }: Props) {
   return (
     <CardShell interactive={false} style={{ padding: 22, height: '100%' }}>
@@ -27,7 +27,8 @@ export function StatTile({
         <span
           style={{
             width: 6, height: 6, borderRadius: 999,
-            background: accent, boxShadow: `0 0 10px ${accent}66`,
+            background: accent,
+            boxShadow: `0 0 10px color-mix(in srgb, ${accent} 40%, transparent)`,
           }}
         />
         {label}
@@ -42,7 +43,7 @@ export function StatTile({
             fontWeight: 600,
             letterSpacing: '-0.04em',
             lineHeight: 0.95,
-            background: `linear-gradient(180deg, #ffffff 0%, ${accent} 130%)`,
+            background: `linear-gradient(180deg, var(--leap-text) 0%, ${accent} 130%)`,
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             color: 'transparent',

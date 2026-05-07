@@ -42,20 +42,24 @@ export default function DashboardShell() {
       };
     });
 
-    // merge developers across projects
-    const devMap = new Map<string, { d: DeveloperScore; scores: number[]; mrs: number }>();
+    // Merge developers across projects.
+    // Backend returns total_score as the SUM of MR scores within a project,
+    // so combining across projects = sum of per-project sums. merge_request_count
+    // also adds. The per-MR average (used downstream for tone-coding) is then
+    // total / mrs regardless of how many projects contributed.
+    const devMap = new Map<string, { d: DeveloperScore; total: number; mrs: number }>();
     activeBundles.forEach(({ scores }) => {
       scores.forEach((d) => {
-        const e = devMap.get(d.user_id) ?? { d, scores: [], mrs: 0 };
-        e.scores.push(d.total_score);
-        e.mrs += d.merge_request_count;
+        const e = devMap.get(d.user_id) ?? { d, total: 0, mrs: 0 };
+        e.total += d.total_score;
+        e.mrs   += d.merge_request_count;
         e.d = d;
         devMap.set(d.user_id, e);
       });
     });
-    const globalDevs: DeveloperScore[] = Array.from(devMap.values()).map(({ d, scores, mrs }) => ({
+    const globalDevs: DeveloperScore[] = Array.from(devMap.values()).map(({ d, total, mrs }) => ({
       ...d,
-      total_score: scores.reduce((a, b) => a + b, 0) / scores.length,
+      total_score: total,
       merge_request_count: mrs,
     }));
 
@@ -133,7 +137,7 @@ export default function DashboardShell() {
                 label="Active projects"
                 value={aggregates.activeProjects.length}
                 unit="repos"
-                accent="#5eead4"
+                accent="var(--leap-accent-cyan)"
                 hint={`${aggregates.totalMRs} merge requests across active projects`}
               />
             </BentoCell>
@@ -142,7 +146,7 @@ export default function DashboardShell() {
                 label="Engineers"
                 value={aggregates.totalEngineers}
                 unit="contributing"
-                accent="#a78bfa"
+                accent="var(--leap-accent-purple)"
                 hint="Developers with at least one MR in this project set."
               />
             </BentoCell>
@@ -151,7 +155,7 @@ export default function DashboardShell() {
                 label="Open MRs"
                 value={aggregates.totalOpenMRs}
                 unit="in-flight"
-                accent="#fbbf24"
+                accent="var(--leap-accent-amber)"
               />
             </BentoCell>
             <BentoCell col={3} colMd={6}>
@@ -159,7 +163,7 @@ export default function DashboardShell() {
                 label="Alerts"
                 value={aggregates.totalAlerts}
                 unit="unresolved"
-                accent={aggregates.totalAlerts > 0 ? '#f87171' : '#5eead4'}
+                accent={aggregates.totalAlerts > 0 ? 'var(--leap-accent-warn)' : 'var(--leap-accent-cyan)'}
                 hint={aggregates.totalAlerts > 0 ? 'Inspect each project to triage.' : 'No critical alerts.'}
               />
             </BentoCell>

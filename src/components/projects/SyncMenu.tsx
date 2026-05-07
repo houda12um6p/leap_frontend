@@ -67,21 +67,22 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
               position: 'absolute',
               top: 'calc(100% + 8px)',
               right: 0,
-              minWidth: 240,
+              minWidth: 260,
               padding: 6,
               borderRadius: 14,
               border: '1px solid var(--leap-border)',
-              background: 'rgba(10, 14, 26, 0.85)',
+              background: 'var(--leap-card-bg)',
               backdropFilter: 'blur(28px) saturate(160%)',
               WebkitBackdropFilter: 'blur(28px) saturate(160%)',
-              boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
-              zIndex: 30,
+              boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+              zIndex: 60,
             }}
           >
-            <MenuItem label="GitHub · pull requests" desc="POST /github/sync/pull-requests" onClick={() => run('github-prs')}     />
-            <MenuItem label="GitHub · commits"       desc="POST /github/sync/commits"        onClick={() => run('github-commits')} />
-            <MenuItem label="Jira · tasks"           desc="POST /jira/sync/tasks"            onClick={() => run('jira-tasks')}     />
-            <MenuItem label="Recalculate scores"     desc="POST /scores/project/{id}/calc"   onClick={() => run('recalc-scores')}  highlight />
+            <MenuItem label="GitHub · pull requests"     desc="POST /github/sync/pull-requests"     onClick={() => run('github-prs')}             />
+            <MenuItem label="GitHub · commits"           desc="POST /github/sync/commits"           onClick={() => run('github-commits')}         />
+            <MenuItem label="GitHub · review comments"   desc="POST /github/sync/review-comments"   onClick={() => run('github-review-comments')} />
+            <MenuItem label="Jira · tasks"               desc="POST /jira/sync/tasks"               onClick={() => run('jira-tasks')}             />
+            <MenuItem label="Recalculate scores"         desc="POST /scores/project/{id}/calc"      onClick={() => run('recalc-scores')}           highlight />
           </motion.div>
         )}
       </AnimatePresence>
@@ -126,7 +127,7 @@ function MenuItem({
         color: highlight ? '#5eead4' : 'var(--leap-text)',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+        e.currentTarget.style.background = 'color-mix(in srgb, var(--leap-text) 6%, transparent)';
         e.currentTarget.style.borderColor = 'var(--leap-border)';
       }}
       onMouseLeave={(e) => {
@@ -153,8 +154,9 @@ function MenuItem({
 }
 
 function labelFor(kind: SyncProjectKind['kind']): string {
-  return kind === 'github-prs'     ? 'GitHub PRs' :
-         kind === 'github-commits' ? 'GitHub commits' :
-         kind === 'jira-tasks'     ? 'Jira tasks' :
-                                     'Score recalculation';
+  return kind === 'github-prs'             ? 'GitHub PRs' :
+         kind === 'github-commits'         ? 'GitHub commits' :
+         kind === 'github-review-comments' ? 'GitHub review comments' :
+         kind === 'jira-tasks'             ? 'Jira tasks' :
+                                             'Score recalculation';
 }

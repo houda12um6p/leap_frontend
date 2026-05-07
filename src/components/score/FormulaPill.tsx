@@ -23,7 +23,7 @@ const wrap: React.CSSProperties = {
   fontFamily: "'Geist Mono', monospace",
   fontSize: 12.5,
   lineHeight: 1.6,
-  background: 'rgba(255,255,255,0.04)',
+  background: 'var(--leap-surface-wash)',
   border: '1px solid var(--leap-border)',
   padding: '14px 16px',
   borderRadius: 10,

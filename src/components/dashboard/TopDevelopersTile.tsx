@@ -2,13 +2,15 @@ import React from 'react';
 import { CardShell } from './CardShell';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
 import { TrendUpIcon } from '../ui/Icon';
-import { scoreBand, DeveloperScore } from '../../lib/types';
+import { scoreBand, DeveloperScore, avgScore } from '../../lib/types';
 
 interface Props {
   developers: DeveloperScore[];
 }
 
 export function TopDevelopersTile({ developers }: Props) {
+  // total_score is a SUM of MR scores. Sort by total (volume × quality);
+  // tone-color from the per-MR average so the band still maps to 0..1000.
   const top = [...developers].sort((a, b) => b.total_score - a.total_score).slice(0, 6);
 
   return (
@@ -27,7 +29,8 @@ export function TopDevelopersTile({ developers }: Props) {
 
       <ul style={{ margin: '20px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {top.map((d, i) => {
-          const tone = scoreBand(d.total_score);
+          const avg = avgScore(d);
+          const tone = scoreBand(avg);
           const initials = d.name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
           return (
             <li
@@ -53,11 +56,11 @@ export function TopDevelopersTile({ developers }: Props) {
                 style={{
                   width: 32, height: 32, borderRadius: 999,
                   display: 'grid', placeItems: 'center',
-                  background: `linear-gradient(135deg, ${tone.tone}33, ${tone.tone}11)`,
+                  background: `linear-gradient(135deg, ${tone.soft}, ${tone.faint})`,
                   color: tone.tone,
                   fontFamily: "'Geist Mono', monospace",
                   fontSize: 11, fontWeight: 600,
-                  border: `1px solid ${tone.tone}33`,
+                  border: `1px solid ${tone.soft}`,
                 }}
               >
                 {initials}
@@ -77,18 +80,29 @@ export function TopDevelopersTile({ developers }: Props) {
                   fontSize: 10, color: 'var(--leap-text-faint)',
                   letterSpacing: '0.06em',
                 }}>
-                  {d.merge_request_count} MRs
+                  {d.merge_request_count} MRs · avg {Math.round(avg)}
                 </span>
               </span>
-              <AnimatedNumber
-                value={Math.round(d.total_score)}
-                style={{
-                  fontFamily: "'Geist', system-ui",
-                  fontSize: 18, fontWeight: 500,
-                  letterSpacing: '-0.02em',
-                  color: tone.tone,
-                }}
-              />
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0 }}>
+                <AnimatedNumber
+                  value={Math.round(d.total_score)}
+                  style={{
+                    fontFamily: "'Geist', system-ui",
+                    fontSize: 18, fontWeight: 500,
+                    letterSpacing: '-0.02em',
+                    color: tone.tone,
+                  }}
+                />
+                <span style={{
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: 9, color: 'var(--leap-text-faint)',
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  marginTop: -2,
+                }}>
+                  Σ score
+                </span>
+              </span>
             </li>
           );
         })}
