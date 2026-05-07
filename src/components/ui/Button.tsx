@@ -1,129 +1,101 @@
-import React, { useState } from 'react';
-import { TOKENS, FONT } from '../../styles/tokens';
+import React, { forwardRef } from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-function Spinner({ color }: { color?: string }) {
-  return (
-    <span
-      className="leap-spinner"
-      aria-hidden
-      style={{ color: color ?? 'currentColor', marginRight: 8 }}
-    />
-  );
+type Variant = 'primary' | 'ghost' | 'glass' | 'sharp';
+type Size    = 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLMotionProps<'button'>, 'children'> {
+  variant?: Variant;
+  size?: Size;
+  icon?: React.ReactNode;
+  trailing?: React.ReactNode;
+  children?: React.ReactNode;
+  block?: boolean;
 }
 
-interface PrimaryButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
-  disabled?: boolean;
-  loading?: boolean;
-  full?: boolean;
-  ariaLabel?: string;
-}
+const sizes: Record<Size, React.CSSProperties> = {
+  sm: { padding: '8px 14px',  fontSize: 12, gap: 8  },
+  md: { padding: '11px 18px', fontSize: 13, gap: 10 },
+  lg: { padding: '14px 22px', fontSize: 14, gap: 12 },
+};
 
-export function PrimaryButton({ children, onClick, type = 'button', disabled, loading, full, ariaLabel }: PrimaryButtonProps) {
-  const [hover, setHover] = useState(false);
-  const isDisabled = disabled || loading;
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={isDisabled}
-      aria-busy={loading || undefined}
-      aria-label={ariaLabel}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        width: full ? '100%' : 'auto',
-        padding: '11px 18px',
-        background: isDisabled ? 'rgba(0,168,107,0.4)' : (hover ? '#00C27C' : TOKENS.accent),
-        color: '#03130A',
-        border: 'none',
-        borderRadius: 8,
-        fontFamily: FONT,
-        fontSize: 13,
-        fontWeight: 600,
-        letterSpacing: -0.1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.15s',
-        boxShadow: hover && !isDisabled ? '0 4px 14px rgba(0,168,107,0.35)' : '0 1px 0 rgba(255,255,255,0.12) inset',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      }}
-    >
-      {loading && <Spinner />}
-      {children}
-    </button>
-  );
-}
+const baseStyle: React.CSSProperties = {
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontFamily: "'Geist', system-ui, sans-serif",
+  fontWeight: 500,
+  letterSpacing: '-0.005em',
+  cursor: 'pointer',
+  border: '1px solid transparent',
+  whiteSpace: 'nowrap',
+  userSelect: 'none',
+  overflow: 'hidden',
+  transition:
+    'border-color 240ms ease, background 240ms ease, color 200ms ease, box-shadow 280ms ease',
+};
 
-interface GhostButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  danger?: boolean;
-  ariaLabel?: string;
-}
-
-export function GhostButton({ children, onClick, danger, ariaLabel }: GhostButtonProps) {
-  const [hover, setHover] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      aria-label={ariaLabel}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        padding: '7px 13px',
-        background: hover ? 'rgba(255,255,255,0.06)' : 'transparent',
-        color: danger ? TOKENS.danger : TOKENS.textDim,
-        border: `1px solid ${danger ? 'rgba(229,72,77,0.4)' : TOKENS.border}`,
-        borderRadius: 7,
-        fontFamily: FONT,
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: 'pointer',
-        transition: 'all 0.15s',
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-interface OutlineGreenButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-  ariaLabel?: string;
-}
-
-export function OutlineGreenButton({ children, onClick, disabled, loading, ariaLabel }: OutlineGreenButtonProps) {
-  const [hover, setHover] = useState(false);
-  const isDisabled = disabled || loading;
-  return (
-    <button
-      onClick={onClick}
-      disabled={isDisabled}
-      aria-busy={loading || undefined}
-      aria-label={ariaLabel}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        padding: '7px 14px',
-        background: isDisabled ? 'transparent' : (hover ? TOKENS.accentSoft : 'transparent'),
-        color: isDisabled ? TOKENS.textFaint : TOKENS.accent,
-        border: `1px solid ${isDisabled ? TOKENS.border : 'rgba(0,168,107,0.5)'}`,
+function variantStyle(v: Variant): React.CSSProperties {
+  switch (v) {
+    case 'primary':
+      return {
+        background:
+          'linear-gradient(180deg, rgba(94, 234, 212, 0.95) 0%, rgba(45, 212, 191, 0.95) 100%)',
+        color: '#03241f',
+        borderRadius: 999,
+        borderColor: 'rgba(94, 234, 212, 0.6)',
+        boxShadow:
+          '0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 26px rgba(45, 212, 191, 0.18)',
+      };
+    case 'ghost':
+      return {
+        background: 'transparent',
+        color: 'var(--leap-text-dim)',
+        borderRadius: 999,
+        borderColor: 'transparent',
+      };
+    case 'glass':
+      return {
+        background: 'rgba(10, 14, 24, 0.55)',
+        color: 'var(--leap-text)',
+        borderRadius: 999,
+        borderColor: 'var(--leap-border)',
+        backdropFilter: 'blur(14px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(14px) saturate(140%)',
+      };
+    case 'sharp':
+      return {
+        background: 'rgba(255, 255, 255, 0.04)',
+        color: 'var(--leap-text)',
         borderRadius: 6,
-        fontFamily: FONT,
-        fontSize: 12,
-        fontWeight: 600,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.15s',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      }}
-    >
-      {loading && <Spinner />}
-      {children}
-    </button>
-  );
+        borderColor: 'var(--leap-border)',
+      };
+  }
 }
+
+export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
+  { variant = 'glass', size = 'md', icon, trailing, children, block, style, ...rest },
+  ref,
+) {
+  return (
+    <motion.button
+      ref={ref}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 24 }}
+      style={{
+        ...baseStyle,
+        ...sizes[size],
+        ...variantStyle(variant),
+        width: block ? '100%' : undefined,
+        ...style,
+      }}
+      {...rest}
+    >
+      {icon && <span style={{ display: 'inline-flex' }}>{icon}</span>}
+      {children}
+      {trailing && <span style={{ display: 'inline-flex' }}>{trailing}</span>}
+    </motion.button>
+  );
+});

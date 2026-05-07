@@ -1,61 +1,95 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { ProjectsPage } from './pages/ProjectsPage';
-import { ProjectDetailPage } from './pages/ProjectDetailPage';
-import { MergeRequestDetailPage } from './pages/MergeRequestDetailPage';
-import { AlertsPage } from './pages/AlertsPage';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useSnapshot } from 'valtio';
+import Background from './components/Background';
+import { SectionBar } from './components/dashboard/SectionBar';
+import { RequireAuth } from './components/auth/RequireAuth';
+import { authState, bootstrapAuth, logout } from './lib/auth';
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div style={{
-        width: '100%', height: '100vh',
-        background: '#0B1F3A',
-        display: 'grid', placeItems: 'center',
-        color: '#00A86B', fontFamily: 'Inter, sans-serif',
-        fontSize: 14, letterSpacing: 1,
-      }}>
-        LOADING…
-      </div>
-    );
-  }
-  if (!user) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+const Welcome           = lazy(() => import('./pages/Welcome'));
+const Login             = lazy(() => import('./pages/Login'));
+const DashboardShell    = lazy(() => import('./pages/DashboardShell'));
+const ProjectsPage      = lazy(() => import('./pages/ProjectsPage'));
+const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
+
+function RouteFallback() {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        zIndex: 1,
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        fontFamily: "'Geist Mono', monospace",
+        fontSize: 11,
+        letterSpacing: '0.32em',
+        textTransform: 'uppercase',
+        color: 'var(--leap-text-faint)',
+      }}
+    >
+      Loading…
+    </div>
+  );
 }
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const snap = useSnapshot(authState);
   return (
     <Routes>
-      <Route path="/login"    element={user ? <Navigate to="/" replace /> : <LoginPage />} />
-      <Route path="/register" element={user ? <Navigate to="/" replace /> : <RegisterPage />} />
-      <Route path="/"         element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-      <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-      <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetailPage /></ProtectedRoute>} />
-      <Route path="/merge-requests/:id" element={<ProtectedRoute><MergeRequestDetailPage /></ProtectedRoute>} />
-      <Route path="/alerts"   element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
-      <Route path="*"         element={<Navigate to="/" replace />} />
+      <Route path="/" element={<Welcome />} />
+      <Route
+        path="/login"
+        element={snap.token && snap.user ? <Navigate to="/dashboard" replace /> : <Login />}
+      />
+      <Route
+        path="/dashboard"
+        element={<RequireAuth><WithSectionBar><DashboardShell /></WithSectionBar></RequireAuth>}
+      />
+      <Route
+        path="/projects"
+        element={<RequireAuth><WithSectionBar><ProjectsPage /></WithSectionBar></RequireAuth>}
+      />
+      <Route
+        path="/projects/:id"
+        element={<RequireAuth><WithSectionBar><ProjectDetailPage /></WithSectionBar></RequireAuth>}
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
+function WithSectionBar({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      {children}
+      <SectionBar />
+    </>
+  );
+}
+
+function AuthBootstrap() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    bootstrapAuth();
+  }, []);
+  // expose a global logout listener for components that don't want to import directly
+  useEffect(() => {
+    const onLogout = () => { logout(); navigate('/login', { replace: true }); };
+    window.addEventListener('leap:logout', onLogout);
+    return () => window.removeEventListener('leap:logout', onLogout);
+  }, [navigate]);
+  return null;
+}
+
 export default function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <ToastProvider>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </ToastProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <AuthBootstrap />
+      <Background />
+      <Suspense fallback={<RouteFallback />}>
+        <AppRoutes />
+      </Suspense>
+    </BrowserRouter>
   );
 }
