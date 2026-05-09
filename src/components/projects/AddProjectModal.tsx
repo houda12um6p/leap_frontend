@@ -50,8 +50,8 @@ export function AddProjectModal() {
       await create.mutateAsync({ name: name.trim(), repo_url: repo.trim() });
       closeAddProject();
       reset();
-    } catch {
-      setError('Could not reach the backend. The project was queued locally.');
+    } catch (e: any) {
+      setError(e?.message || 'Could not create project.');
     }
   };
 

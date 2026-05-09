@@ -1,4 +1,4 @@
-/* Shape of the LEAP backend at localhost:8000/api/v1.
+/* Shape of the LEAP backend at localhost:8011/api/v1.
    Verified against leap_backend/app/models + routers. */
 
 /* ---------- entities ---------- */

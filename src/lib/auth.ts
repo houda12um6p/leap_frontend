@@ -47,7 +47,7 @@ function persistToken(t: string | null) {
 
 const API_BASE =
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) ||
-  '/api/v1';   // proxied to localhost:8000 by setupProxy.js
+  '/api/v1';   // proxied to localhost:8011 by setupProxy.js
 
 async function postJson<T>(path: string, body: unknown, token?: string | null): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

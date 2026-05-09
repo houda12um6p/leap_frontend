@@ -39,8 +39,14 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
     try {
       await sync.mutateAsync(input);
       setLast(`Synced · ${labelFor(kind)}`);
-    } catch {
-      setLast(`Queued locally · ${labelFor(kind)}`);
+    } catch (e: any) {
+      const detail =
+        (e as any)?.response?.data?.detail ??
+        (e as any)?.data?.detail ??
+        (e as Error)?.message ??
+        'unknown error';
+      setLast(`Sync failed · ${detail}`);
+      console.error('Sync error:', e?.response?.data?.detail || e?.message || e);
     }
   }
 
@@ -82,7 +88,7 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
             <MenuItem label="GitHub · commits"           desc="POST /github/sync/commits"           onClick={() => run('github-commits')}         />
             <MenuItem label="GitHub · review comments"   desc="POST /github/sync/review-comments"   onClick={() => run('github-review-comments')} />
             <MenuItem label="Jira · tasks"               desc="POST /jira/sync/tasks"               onClick={() => run('jira-tasks')}             />
-            <MenuItem label="Recalculate scores"         desc="POST /scores/project/{id}/calc"      onClick={() => run('recalc-scores')}           highlight />
+            <MenuItem label="Recalculate scores"         desc="POST /scores/project/{id}/calculate"      onClick={() => run('recalc-scores')}           highlight />
           </motion.div>
         )}
       </AnimatePresence>

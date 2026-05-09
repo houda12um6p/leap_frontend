@@ -275,7 +275,7 @@ export const mockDevelopersByProject: Record<string, DeveloperScore[]> = Object.
       user_id: user.user_id,
       name: user.name,
       email: user.email,
-      total_score: Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100) / 100,
+      total_score: Math.round(scores.reduce((a, b) => a + b, 0) * 100) / 100,
       min_score: Math.round(Math.min(...scores) * 100) / 100,
       max_score: Math.round(Math.max(...scores) * 100) / 100,
       merge_request_count: scores.length,

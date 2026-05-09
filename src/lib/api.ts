@@ -10,7 +10,7 @@ import type {
 
 const API_BASE =
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) ||
-  '/api/v1';     // proxied to localhost:8000 by setupProxy.js
+  '/api/v1';     // proxied to localhost:8011 by setupProxy.js
 
 function authHeaders(): HeadersInit {
   const t = typeof localStorage !== 'undefined' ? localStorage.getItem('leap.token') : null;
