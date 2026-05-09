@@ -14,6 +14,7 @@ import { TeamRoster } from '../components/project-detail/TeamRoster';
 import { JiraPanel } from '../components/project-detail/JiraPanel';
 import { PRLedger } from '../components/project-detail/PRLedger';
 import { CardShell } from '../components/dashboard/CardShell';
+import CompteRenduPanel from '../components/project-detail/CompteRenduPanel';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -86,6 +87,8 @@ export default function ProjectDetailPage() {
           <JiraPanel tasks={jiraQ.data ?? []} />
         </div>
       </motion.section>
+
+      <CompteRenduPanel projectId={id!} />
     </main>
   );
 }

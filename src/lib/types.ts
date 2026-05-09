@@ -132,6 +132,27 @@ export interface ScoreTone {
   label: string;
 }
 
+export interface Action {
+  action: string;
+  responsible: string;
+  deadline: string | null;
+}
+
+export interface CompteRendu {
+  id: string;
+  project_id: string;
+  raw_text: string;
+  language: string;
+  decisions: string[];
+  actions: Action[];
+  blocages: string[];
+  resume: string;
+  created_at: string;
+  expires_at: string;
+  is_active: boolean;
+  days_remaining: number;
+}
+
 export function scoreBand(score: number): ScoreTone {
   if (score >= 850) return {
     tone:  'var(--leap-band-exceptional)',

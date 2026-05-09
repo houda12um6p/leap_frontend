@@ -6,6 +6,7 @@ import type {
   MergeRequestDetail,
   JiraTask,
   ProjectOverview,
+  CompteRendu,
 } from './types';
 
 const API_BASE =
@@ -214,6 +215,23 @@ export interface SyncProjectKind {
   projectId: string;
   repo_owner?: string;
   repo_name?: string;
+}
+
+/* ----------------------------- compte rendus ------------------------- */
+
+export function getCompteRendus(projectId: string): Promise<CompteRendu[]> {
+  return request<CompteRendu[]>(`/projects/${projectId}/compte-rendus`);
+}
+
+export function getActiveCompteRendus(projectId: string): Promise<CompteRendu[]> {
+  return request<CompteRendu[]>(`/projects/${projectId}/compte-rendus/active`);
+}
+
+export function createCompteRendu(projectId: string, rawText: string): Promise<CompteRendu> {
+  return request<CompteRendu>(`/projects/${projectId}/compte-rendus`, {
+    method: 'POST',
+    body: JSON.stringify({ raw_text: rawText }),
+  });
 }
 
 export function useSyncProject() {
