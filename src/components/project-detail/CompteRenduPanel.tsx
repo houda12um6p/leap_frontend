@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CardShell } from '../dashboard/CardShell';
-import { getCompteRendus, createCompteRendu } from '../../lib/api';
+import { getCompteRendus, createCompteRendu, createCompteRenduFromFile } from '../../lib/api';
 import type { CompteRendu } from '../../lib/types';
 
 interface Props {
@@ -156,9 +156,7 @@ function CompteRenduCard({ cr, expanded, onToggle }: {
                   borderRadius: 8,
                   fontSize: 13,
                 }}>
-                  <div style={{
-                    fontWeight: 500, color: 'var(--leap-text)', marginBottom: 5,
-                  }}>
+                  <div style={{ fontWeight: 500, color: 'var(--leap-text)', marginBottom: 5 }}>
                     {a.action}
                   </div>
                   <div style={{
@@ -169,9 +167,7 @@ function CompteRenduCard({ cr, expanded, onToggle }: {
                   }}>
                     <span>{a.responsible}</span>
                     {a.deadline && (
-                      <span style={{ color: 'var(--leap-accent-amber)' }}>
-                        {a.deadline}
-                      </span>
+                      <span style={{ color: 'var(--leap-accent-amber)' }}>{a.deadline}</span>
                     )}
                   </div>
                 </div>
@@ -233,8 +229,11 @@ function CompteRenduCard({ cr, expanded, onToggle }: {
 export default function CompteRenduPanel({ projectId }: Props) {
   const queryClient = useQueryClient();
   const [text, setText] = useState('');
+  const [tab, setTab] = useState<'text' | 'file'>('text');
+  const [dragOver, setDragOver] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: allCRs = [], isLoading } = useQuery({
     queryKey: ['compte-rendus', projectId],
@@ -250,13 +249,36 @@ export default function CompteRenduPanel({ projectId }: Props) {
     },
   });
 
+  const fileMutation = useMutation({
+    mutationFn: (file: File) => createCompteRenduFromFile(projectId, file),
+    onSuccess: (newCR) => {
+      queryClient.invalidateQueries({ queryKey: ['compte-rendus', projectId] });
+      setExpandedId(newCR.id);
+    },
+  });
+
   const activeCRs = allCRs.filter(cr => cr.is_active);
   const expiredCRs = allCRs.filter(cr => !cr.is_active);
   const displayedExpired = showAll ? expiredCRs : expiredCRs.slice(0, 3);
   const canSubmit = text.trim().length >= 30 && !mutation.isPending;
 
+  const tabBtnStyle = (active: boolean): React.CSSProperties => ({
+    padding: '5px 14px',
+    borderRadius: 8,
+    border: '1px solid var(--leap-border)',
+    background: active ? 'var(--leap-surface-wash)' : 'transparent',
+    color: active ? 'var(--leap-text)' : 'var(--leap-text-faint)',
+    fontSize: 10,
+    fontFamily: "'Geist Mono', monospace",
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  });
+
   return (
     <CardShell interactive={false} style={{ padding: 22, marginTop: 18 }}>
+      {/* Section header */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8,
         fontFamily: "'Geist Mono', monospace",
@@ -283,72 +305,156 @@ export default function CompteRenduPanel({ projectId }: Props) {
           fontSize: 10, letterSpacing: '0.14em',
           textTransform: 'uppercase',
           color: 'var(--leap-text-faint)',
-          marginBottom: 10,
+          marginBottom: 12,
         }}>
           nouveau compte rendu
         </div>
-        <textarea
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder="Collez le texte du compte rendu ici…"
-          rows={5}
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            padding: '10px 12px',
-            fontSize: 13, lineHeight: 1.6,
-            borderRadius: 8,
-            border: '1px solid var(--leap-border)',
-            background: 'var(--leap-input-bg)',
-            color: 'var(--leap-text)',
-            resize: 'vertical',
-            fontFamily: "'Geist', 'Inter', system-ui, sans-serif",
-            outline: 'none',
-          }}
-        />
-        <div style={{
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', marginTop: 10,
-        }}>
-          <span style={{
-            fontFamily: "'Geist Mono', monospace",
-            fontSize: 10, letterSpacing: '0.08em',
-            color: 'var(--leap-text-faint)',
-          }}>
-            {text.length} chars
-            {text.length > 0 && text.length < 30 && ' · too short'}
-          </span>
-          <button
-            onClick={() => mutation.mutate(text)}
-            disabled={!canSubmit}
-            style={{
-              padding: '7px 16px',
-              borderRadius: 8,
-              border: '1px solid var(--leap-border)',
-              background: canSubmit ? 'var(--leap-surface-wash)' : 'transparent',
-              color: canSubmit ? 'var(--leap-text)' : 'var(--leap-text-faint)',
-              fontSize: 10,
-              fontFamily: "'Geist Mono', monospace",
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              cursor: canSubmit ? 'pointer' : 'not-allowed',
-              transition: 'all 0.15s',
-            }}
-          >
-            {mutation.isPending ? 'analysing…' : 'analyser'}
+
+        {/* Tab switcher */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+          <button style={tabBtnStyle(tab === 'text')} onClick={() => setTab('text')}>
+            texte
+          </button>
+          <button style={tabBtnStyle(tab === 'file')} onClick={() => setTab('file')}>
+            fichier
           </button>
         </div>
-        {mutation.isError && (
-          <div style={{
-            marginTop: 8, fontSize: 11,
-            color: 'var(--leap-band-warn)',
-            padding: '6px 10px',
-            background: 'var(--leap-band-warn-faint)',
-            borderRadius: 8,
-            fontFamily: "'Geist Mono', monospace",
-            letterSpacing: '0.04em',
-          }}>
-            {(mutation.error as Error)?.message ?? 'erreur lors de l\'analyse'}
-          </div>
+
+        {tab === 'text' ? (
+          <>
+            <textarea
+              value={text}
+              onChange={e => setText(e.target.value)}
+              placeholder="Collez le texte du compte rendu ici…"
+              rows={5}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                padding: '10px 12px',
+                fontSize: 13, lineHeight: 1.6,
+                borderRadius: 8,
+                border: '1px solid var(--leap-border)',
+                background: 'var(--leap-input-bg)',
+                color: 'var(--leap-text)',
+                resize: 'vertical',
+                fontFamily: "'Geist', 'Inter', system-ui, sans-serif",
+                outline: 'none',
+              }}
+            />
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', marginTop: 10,
+            }}>
+              <span style={{
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: 10, letterSpacing: '0.08em',
+                color: 'var(--leap-text-faint)',
+              }}>
+                {text.length} chars
+                {text.length > 0 && text.length < 30 && ' · too short'}
+              </span>
+              <button
+                onClick={() => mutation.mutate(text)}
+                disabled={!canSubmit}
+                style={{
+                  padding: '7px 16px',
+                  borderRadius: 8,
+                  border: '1px solid var(--leap-border)',
+                  background: canSubmit ? 'var(--leap-surface-wash)' : 'transparent',
+                  color: canSubmit ? 'var(--leap-text)' : 'var(--leap-text-faint)',
+                  fontSize: 10,
+                  fontFamily: "'Geist Mono', monospace",
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  cursor: canSubmit ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {mutation.isPending ? 'analysing…' : 'analyser'}
+              </button>
+            </div>
+            {mutation.isError && (
+              <div style={{
+                marginTop: 8, fontSize: 11,
+                color: 'var(--leap-band-warn)',
+                padding: '6px 10px',
+                background: 'var(--leap-band-warn-faint)',
+                borderRadius: 8,
+                fontFamily: "'Geist Mono', monospace",
+                letterSpacing: '0.04em',
+              }}>
+                {(mutation.error as Error)?.message ?? "erreur lors de l'analyse"}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Drop zone */}
+            <div
+              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={e => {
+                e.preventDefault();
+                setDragOver(false);
+                const file = e.dataTransfer.files[0];
+                if (file) fileMutation.mutate(file);
+              }}
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                border: `1px dashed ${dragOver ? 'var(--leap-text-dim)' : 'var(--leap-border)'}`,
+                borderRadius: 8,
+                padding: '28px 16px',
+                textAlign: 'center',
+                cursor: fileMutation.isPending ? 'default' : 'pointer',
+                transition: 'border-color 0.15s, background 0.15s',
+                background: dragOver ? 'var(--leap-surface-wash)' : 'transparent',
+              }}
+            >
+              <div style={{
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: 10, letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: fileMutation.isPending ? 'var(--leap-text-dim)' : 'var(--leap-text-faint)',
+                lineHeight: 2.2,
+              }}>
+                {fileMutation.isPending
+                  ? 'extraction et analyse en cours…'
+                  : (
+                    <>
+                      glisser un fichier ici ou cliquer pour choisir
+                      <br />
+                      <span style={{ opacity: 0.6, fontSize: 9 }}>
+                        pdf · docx · txt · max 10 mb
+                      </span>
+                    </>
+                  )
+                }
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.doc,.txt"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) fileMutation.mutate(file);
+                  e.target.value = '';
+                }}
+              />
+            </div>
+            {fileMutation.isError && (
+              <div style={{
+                marginTop: 8, fontSize: 11,
+                color: 'var(--leap-band-warn)',
+                padding: '6px 10px',
+                background: 'var(--leap-band-warn-faint)',
+                borderRadius: 8,
+                fontFamily: "'Geist Mono', monospace",
+                letterSpacing: '0.04em',
+              }}>
+                {(fileMutation.error as Error)?.message ?? "erreur lors de l'analyse"}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -440,7 +546,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
               border: '1px dashed var(--leap-border-soft)',
               borderRadius: 12,
             }}>
-              aucun compte rendu — collez le texte d'une reunion ci-dessus
+              aucun compte rendu — collez le texte ou deposez un fichier ci-dessus
             </div>
           )}
         </>

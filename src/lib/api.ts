@@ -234,6 +234,31 @@ export function createCompteRendu(projectId: string, rawText: string): Promise<C
   });
 }
 
+export async function createCompteRenduFromFile(
+  projectId: string,
+  file: File
+): Promise<CompteRendu> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('leap.token') : null;
+  const res = await fetch(`${API_BASE}/projects/${projectId}/compte-rendus/upload`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (res.status === 401) {
+    try { localStorage.removeItem('leap.token'); localStorage.removeItem('leap.user'); } catch {}
+    window.dispatchEvent(new Event('leap:logout'));
+    throw new Error('Session expired. Please sign in again.');
+  }
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try { const j = await res.json(); detail = j?.detail || detail; } catch {}
+    throw new Error(detail);
+  }
+  return res.json();
+}
+
 export function useSyncProject() {
   const qc = useQueryClient();
   return useMutation({
