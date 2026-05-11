@@ -58,17 +58,15 @@ export default function Welcome() {
       >
         <motion.div className="welcome-eyebrow" variants={item}>
           <span className="dot" />
-          OCPS &nbsp;//&nbsp; v0.1 &nbsp;//&nbsp; Engineering Intelligence
+           &nbsp;//&nbsp; &nbsp;//&nbsp; 
         </motion.div>
 
         <motion.h1 className="welcome-title" variants={item}>
-          OCPS&nbsp;<em>LEAP</em>
+          &nbsp;<em>LEAP</em>
         </motion.h1>
 
         <motion.p className="welcome-subtitle" variants={item}>
-          Engineering Intelligence Command. <br />
-          A live signal layer over your commits, merge requests and Jira flow —
-          surfaced with calm, deliberate clarity.
+          Your engineering health, at a glance.
         </motion.p>
 
         <motion.div variants={item}>

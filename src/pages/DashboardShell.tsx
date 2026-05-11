@@ -101,7 +101,7 @@ export default function DashboardShell() {
               boxShadow: '0 0 12px rgba(94, 234, 212, 0.6)',
               animation: 'pulse 2.6s ease-in-out infinite',
             }} />
-            Engineering intelligence · live
+             
           </div>
           <h1 style={{
             margin: 0,

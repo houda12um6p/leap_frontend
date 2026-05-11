@@ -61,10 +61,7 @@ export default function Login() {
         animate="show"
         style={{ width: 'min(440px, 100%)' }}
       >
-        <motion.div className="welcome-eyebrow" variants={item}>
-          <span className="dot" />
-          OCPS &nbsp;//&nbsp; gateway
-        </motion.div>
+        
 
         <motion.h1
           variants={item}
@@ -85,11 +82,6 @@ export default function Login() {
           {mode === 'login' ? <>Welcome <em style={italicAccent}>back</em>.</> : <>Join <em style={italicAccent}>LEAP</em>.</>}
         </motion.h1>
 
-        <motion.p variants={item} className="welcome-subtitle" style={{ marginBottom: 4 }}>
-          {mode === 'login'
-            ? 'Sign in to your engineering intelligence command.'
-            : 'Create your developer account in seconds.'}
-        </motion.p>
 
         <motion.div variants={item} style={{ width: '100%' }}>
           {mode === 'register' && (
