@@ -50,6 +50,7 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
         'unknown error';
       setLast(null);
       toast.error(`Could not sync ${labelFor(kind)}.`, { description: detail });
+      // intentional: surfaces sync errors in browser devtools
       console.error('Sync error:', detail, e);
     }
   }
