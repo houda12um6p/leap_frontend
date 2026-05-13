@@ -5,8 +5,11 @@ import type {
   MergeRequestSummary,
   MergeRequestDetail,
   JiraTask,
+  JiraSprint,
   ProjectOverview,
   CompteRendu,
+  TimelinePoint,
+  Alert,
 } from './types';
 
 const API_BASE =
@@ -99,6 +102,38 @@ export function useJiraTasks(projectId: string | undefined) {
   });
 }
 
+export function useJiraSprints(projectId: string | undefined) {
+  return useQuery<JiraSprint[]>({
+    queryKey: ['jira-sprints', projectId],
+    enabled: !!projectId,
+    queryFn: async () => {
+      try {
+        const raw = await request<JiraSprint[] | { sprints: JiraSprint[] }>(`/jira/sprints`);
+        if (Array.isArray(raw)) return raw;
+        return raw?.sprints ?? [];
+      } catch {
+        return [];
+      }
+    },
+  });
+}
+
+export function useProjectTimeline(projectId: string | undefined) {
+  return useQuery<TimelinePoint[]>({
+    queryKey: ['timeline', projectId],
+    enabled: !!projectId,
+    queryFn: () => request<TimelinePoint[]>(`/dashboard/${projectId}/timeline`),
+  });
+}
+
+export function useProjectAlerts(projectId: string | undefined) {
+  return useQuery<Alert[]>({
+    queryKey: ['alerts', projectId],
+    enabled: !!projectId,
+    queryFn: () => request<Alert[]>(`/projects/${projectId}/alerts`),
+  });
+}
+
 /* ----------------------------- fan-out queries ----------------------- */
 
 /**
@@ -172,6 +207,28 @@ export function useCreateProject() {
         body: JSON.stringify({ ...input, status: 'active' }),
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+  });
+}
+
+export interface UpdateProjectInput {
+  id: string;
+  name?: string;
+  repo_url?: string;
+  status?: 'active' | 'archived';
+}
+
+export function useUpdateProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...patch }: UpdateProjectInput) =>
+      request<Project>(`/projects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(patch),
+      }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['project', data.id] });
+    },
   });
 }
 

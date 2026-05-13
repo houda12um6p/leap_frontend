@@ -8,11 +8,16 @@ import {
   useDeveloperScores,
   useProjectMergeRequests,
   useJiraTasks,
+  useJiraSprints,
+  useProjectTimeline,
+  useProjectAlerts,
 } from '../lib/api';
 import { ProjectHeader } from '../components/project-detail/ProjectHeader';
 import { TeamRoster } from '../components/project-detail/TeamRoster';
 import { JiraPanel } from '../components/project-detail/JiraPanel';
 import { PRLedger } from '../components/project-detail/PRLedger';
+import { ScoreTrendPanel } from '../components/project-detail/ScoreTrendPanel';
+import { AlertsPanel } from '../components/project-detail/AlertsPanel';
 import { CardShell } from '../components/dashboard/CardShell';
 import CompteRenduPanel from '../components/project-detail/CompteRenduPanel';
 
@@ -23,6 +28,9 @@ export default function ProjectDetailPage() {
   const devsQ = useDeveloperScores(id);
   const prsQ = useProjectMergeRequests(id);
   const jiraQ = useJiraTasks(id);
+  const sprintsQ = useJiraSprints(id);
+  const timelineQ = useProjectTimeline(id);
+  const alertsQ = useProjectAlerts(id);
 
   // Surface backend errors as toasts.
   useEffect(() => {
@@ -84,11 +92,26 @@ export default function ProjectDetailPage() {
 
           <div style={{ height: 18 }} />
 
-          <JiraPanel tasks={jiraQ.data ?? []} />
+          <JiraPanel tasks={jiraQ.data ?? []} sprints={sprintsQ.data ?? []} />
         </div>
       </motion.section>
 
-      <CompteRenduPanel projectId={id!} />
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr', gap: 18 }}
+      >
+        <ScoreTrendPanel
+          points={timelineQ.data ?? []}
+          isLoading={timelineQ.isLoading}
+        />
+        <AlertsPanel
+          alerts={alertsQ.data ?? []}
+          isLoading={alertsQ.isLoading}
+        />
+        <CompteRenduPanel projectId={id} />
+      </motion.section>
     </main>
   );
 }

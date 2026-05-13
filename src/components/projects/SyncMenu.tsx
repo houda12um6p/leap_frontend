@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence as APRaw } from 'framer-motion';
+import { toast } from 'sonner';
 import { Button } from '../ui/Button';
 import { SyncIcon, ChevronDownIcon } from '../ui/Icon';
 import { useSyncProject, SyncProjectKind } from '../../lib/api';
@@ -39,14 +40,17 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
     try {
       await sync.mutateAsync(input);
       setLast(`Synced · ${labelFor(kind)}`);
-    } catch (e: any) {
+      toast.success(`Synced ${labelFor(kind)}`);
+    } catch (e) {
+      const err = e as { response?: { data?: { detail?: string } }; data?: { detail?: string }; message?: string };
       const detail =
-        (e as any)?.response?.data?.detail ??
-        (e as any)?.data?.detail ??
-        (e as Error)?.message ??
+        err?.response?.data?.detail ??
+        err?.data?.detail ??
+        err?.message ??
         'unknown error';
-      setLast(`Sync failed · ${detail}`);
-      console.error('Sync error:', e?.response?.data?.detail || e?.message || e);
+      setLast(null);
+      toast.error(`Could not sync ${labelFor(kind)}.`, { description: detail });
+      console.error('Sync error:', detail, e);
     }
   }
 
@@ -84,11 +88,11 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
               zIndex: 60,
             }}
           >
-            <MenuItem label="GitHub · pull requests"     desc="POST /github/sync/pull-requests"     onClick={() => run('github-prs')}             />
-            <MenuItem label="GitHub · commits"           desc="POST /github/sync/commits"           onClick={() => run('github-commits')}         />
-            <MenuItem label="GitHub · review comments"   desc="POST /github/sync/review-comments"   onClick={() => run('github-review-comments')} />
-            <MenuItem label="Jira · tasks"               desc="POST /jira/sync/tasks"               onClick={() => run('jira-tasks')}             />
-            <MenuItem label="Recalculate scores"         desc="POST /scores/project/{id}/calculate"      onClick={() => run('recalc-scores')}           highlight />
+            <MenuItem disabled={sync.isPending} label="GitHub · pull requests"     desc="POST /github/sync/pull-requests"     onClick={() => run('github-prs')}             />
+            <MenuItem disabled={sync.isPending} label="GitHub · commits"           desc="POST /github/sync/commits"           onClick={() => run('github-commits')}         />
+            <MenuItem disabled={sync.isPending} label="GitHub · review comments"   desc="POST /github/sync/review-comments"   onClick={() => run('github-review-comments')} />
+            <MenuItem disabled={sync.isPending} label="Jira · tasks"               desc="POST /jira/sync/tasks"               onClick={() => run('jira-tasks')}             />
+            <MenuItem disabled={sync.isPending} label="Recalculate scores"         desc="POST /scores/project/{id}/calculate" onClick={() => run('recalc-scores')}           highlight />
           </motion.div>
         )}
       </AnimatePresence>
@@ -116,11 +120,12 @@ export function SyncMenu({ projectId, repoUrl }: Props) {
 }
 
 function MenuItem({
-  label, desc, onClick, highlight,
-}: { label: string; desc: string; onClick: () => void; highlight?: boolean }) {
+  label, desc, onClick, highlight, disabled,
+}: { label: string; desc: string; onClick: () => void; highlight?: boolean; disabled?: boolean }) {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       style={{
         width: '100%',
         textAlign: 'left',
@@ -129,14 +134,17 @@ function MenuItem({
         background: 'transparent',
         border: '1px solid transparent',
         transition: 'background 180ms ease, border-color 180ms ease',
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
         color: highlight ? '#5eead4' : 'var(--leap-text)',
       }}
       onMouseEnter={(e) => {
+        if (disabled) return;
         e.currentTarget.style.background = 'color-mix(in srgb, var(--leap-text) 6%, transparent)';
         e.currentTarget.style.borderColor = 'var(--leap-border)';
       }}
       onMouseLeave={(e) => {
+        if (disabled) return;
         e.currentTarget.style.background = 'transparent';
         e.currentTarget.style.borderColor = 'transparent';
       }}

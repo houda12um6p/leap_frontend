@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { CardShell } from '../dashboard/CardShell';
-import type { JiraTask } from '../../lib/types';
+import { ChevronDownIcon } from '../ui/Icon';
+import type { JiraTask, JiraSprint } from '../../lib/types';
 
 const COLUMNS: Array<{ key: string; label: string; match: (s: string) => boolean; color: string }> = [
   { key: 'todo',     label: 'Backlog · To do',  match: (s) => /to ?do|backlog/i.test(s),    color: '#94a3b8' },
@@ -9,37 +10,77 @@ const COLUMNS: Array<{ key: string; label: string; match: (s: string) => boolean
   { key: 'done',     label: 'Done',              match: (s) => /done|closed/i.test(s),       color: '#5eead4' },
 ];
 
-interface Props { tasks: JiraTask[]; }
+interface Props {
+  tasks: JiraTask[];
+  sprints: JiraSprint[];
+}
 
-export function JiraPanel({ tasks }: Props) {
+const ALL_SPRINTS = '__all__';
+
+export function JiraPanel({ tasks, sprints }: Props) {
+  const [sprintId, setSprintId] = useState<string>(ALL_SPRINTS);
+
+  const derivedSprints = useMemo<JiraSprint[]>(() => {
+    if (sprints.length > 0) return sprints;
+    const map = new Map<string, JiraSprint>();
+    tasks.forEach((t) => {
+      if (t.sprint_id) {
+        map.set(t.sprint_id, {
+          id: t.sprint_id,
+          name: t.sprint_name ?? t.sprint_id,
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [sprints, tasks]);
+
+  const filteredTasks = useMemo(() => {
+    if (sprintId === ALL_SPRINTS) return tasks;
+    return tasks.filter((t) => t.sprint_id === sprintId);
+  }, [tasks, sprintId]);
+
   const buckets = COLUMNS.map((col) => ({
     ...col,
-    items: tasks.filter((t) => col.match(t.status)),
+    items: filteredTasks.filter((t) => col.match(t.status)),
   }));
 
-  // unmatched fall into "Backlog"
   const matched = new Set(buckets.flatMap((b) => b.items.map((t) => t.jira_key)));
-  const orphaned = tasks.filter((t) => !matched.has(t.jira_key));
+  const orphaned = filteredTasks.filter((t) => !matched.has(t.jira_key));
   if (orphaned.length) buckets[0].items.push(...orphaned);
 
   return (
     <CardShell interactive={false} style={{ padding: 22 }}>
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
+        display: 'flex', alignItems: 'center', gap: 10,
+        flexWrap: 'wrap',
         fontFamily: "'Geist Mono', monospace",
         fontSize: 10, letterSpacing: '0.22em',
         textTransform: 'uppercase', color: 'var(--leap-text-faint)',
         marginBottom: 14,
       }}>
         Jira tasks
-        <span style={{ marginLeft: 'auto', color: 'var(--leap-text-dim)' }}>
-          {tasks.length} total
-        </span>
+
+        <div style={{
+          marginLeft: 'auto',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 10,
+          flexWrap: 'wrap',
+        }}>
+          <SprintSelect
+            value={sprintId}
+            sprints={derivedSprints}
+            onChange={setSprintId}
+          />
+          <span style={{ color: 'var(--leap-text-dim)', whiteSpace: 'nowrap' }}>
+            {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
+          </span>
+        </div>
       </div>
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: 12,
       }}>
         {buckets.map((b) => (
@@ -122,5 +163,49 @@ export function JiraPanel({ tasks }: Props) {
         ))}
       </div>
     </CardShell>
+  );
+}
+
+function SprintSelect({
+  value, sprints, onChange,
+}: { value: string; sprints: JiraSprint[]; onChange: (v: string) => void }) {
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label="Filter by sprint"
+        style={{
+          appearance: 'none',
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
+          padding: '6px 28px 6px 12px',
+          borderRadius: 999,
+          border: '1px solid var(--leap-border)',
+          background: 'var(--leap-card-bg)',
+          color: 'var(--leap-text-dim)',
+          fontFamily: "'Geist Mono', monospace",
+          fontSize: 10.5,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          cursor: 'pointer',
+        }}
+      >
+        <option value={ALL_SPRINTS}>All sprints</option>
+        {sprints.map((s) => (
+          <option key={s.id} value={s.id}>{s.name}</option>
+        ))}
+      </select>
+      <span style={{
+        position: 'absolute',
+        right: 10, top: '50%',
+        transform: 'translateY(-50%)',
+        pointerEvents: 'none',
+        color: 'var(--leap-text-faint)',
+        display: 'inline-flex',
+      }}>
+        <ChevronDownIcon size={12} />
+      </span>
+    </div>
   );
 }

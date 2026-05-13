@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { useCreateProject } from '../../lib/api';
-import { useSnapshot } from 'valtio';
-import { dashboardState, closeAddProject } from '../../store';
+import { useUpdateProject } from '../../lib/api';
+import type { Project } from '../../lib/types';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -30,46 +29,54 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 8,
 };
 
-export function AddProjectModal() {
-  const snap = useSnapshot(dashboardState);
-  const create = useCreateProject();
-  const [name, setName] = useState('');
-  const [repo, setRepo] = useState('');
+interface Props {
+  open: boolean;
+  project: Project;
+  onClose: () => void;
+}
+
+export function EditProjectModal({ open, project, onClose }: Props) {
+  const update = useUpdateProject();
+  const [name, setName] = useState(project.name);
+  const [repo, setRepo] = useState(project.repo_url);
+  const [status, setStatus] = useState<'active' | 'archived'>(project.status);
   const [error, setError] = useState<string | null>(null);
 
-  const reset = () => {
-    setName('');
-    setRepo('');
-    setError(null);
-  };
+  useEffect(() => {
+    if (open) {
+      setName(project.name);
+      setRepo(project.repo_url);
+      setStatus(project.status);
+      setError(null);
+    }
+  }, [open, project]);
 
   const submit = async () => {
     setError(null);
     if (!name.trim()) return setError('Project name is required.');
     if (!repo.trim()) return setError('Repository URL is required.');
     try {
-      await create.mutateAsync({ name: name.trim(), repo_url: repo.trim() });
-      toast.success(`Added ${name.trim()}`);
-      closeAddProject();
-      reset();
+      await update.mutateAsync({
+        id: project.id,
+        name: name.trim(),
+        repo_url: repo.trim(),
+        status,
+      });
+      toast.success(`Updated ${name.trim()}`);
+      onClose();
     } catch (e) {
-      setError((e as Error)?.message || 'Could not create project.');
+      setError((e as Error).message ?? 'Could not update project.');
     }
   };
 
   return (
-    <Modal
-      open={snap.isAddProjectOpen}
-      onClose={() => { closeAddProject(); reset(); }}
-      title="Add a new project"
-    >
+    <Modal open={open} onClose={onClose} title="Edit project">
       <p style={{
         margin: '0 0 18px',
         color: 'var(--leap-text-dim)',
         fontSize: 13, lineHeight: 1.5,
       }}>
-        Paste your repository URL — LEAP will fan out to GitHub & Jira sync once
-        you land in the project workspace.
+        Adjust the project name, repository URL or status. Changes are pushed via PATCH&nbsp;/projects/&#123;id&#125;.
       </p>
 
       <label style={labelStyle}>Project name</label>
@@ -94,6 +101,40 @@ export function AddProjectModal() {
         onBlur={(e)  => { e.currentTarget.style.borderColor = 'var(--leap-border)'; }}
       />
 
+      <div style={{ height: 14 }} />
+
+      <label style={labelStyle}>Status</label>
+      <div role="radiogroup" style={{ display: 'flex', gap: 8 }}>
+        {(['active', 'archived'] as const).map((s) => {
+          const selected = status === s;
+          return (
+            <button
+              key={s}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => setStatus(s)}
+              style={{
+                flex: 1,
+                padding: '10px 14px',
+                borderRadius: 10,
+                border: `1px solid ${selected ? 'rgba(94, 234, 212, 0.55)' : 'var(--leap-border)'}`,
+                background: selected ? 'rgba(94, 234, 212, 0.08)' : 'var(--leap-card-bg)',
+                color: selected ? 'var(--leap-text)' : 'var(--leap-text-dim)',
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: 11,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'background 200ms ease, border-color 200ms ease, color 200ms ease',
+              }}
+            >
+              {s}
+            </button>
+          );
+        })}
+      </div>
+
       {error && (
         <div style={{
           marginTop: 14, padding: '8px 12px',
@@ -109,16 +150,14 @@ export function AddProjectModal() {
       )}
 
       <div style={{ marginTop: 22, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <Button variant="ghost" size="md" onClick={() => { closeAddProject(); reset(); }}>
-          Cancel
-        </Button>
+        <Button variant="ghost" size="md" onClick={onClose}>Cancel</Button>
         <Button
           variant="primary"
           size="md"
           onClick={submit}
-          disabled={create.isPending}
+          disabled={update.isPending}
         >
-          {create.isPending ? 'Adding…' : 'Add project'}
+          {update.isPending ? 'Saving…' : 'Save changes'}
         </Button>
       </div>
     </Modal>

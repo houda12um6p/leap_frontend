@@ -80,6 +80,32 @@ export interface JiraTask {
   summary: string;
   status: string;
   story_points: number;
+  sprint_id?: string | null;
+  sprint_name?: string | null;
+}
+
+export interface JiraSprint {
+  id: string;
+  name: string;
+  state?: 'active' | 'closed' | 'future' | string;
+}
+
+export interface TimelinePoint {
+  week: string;
+  total_score: number;
+  merge_request_count: number;
+}
+
+export interface Alert {
+  id: string;
+  project_id: string;
+  type: string;
+  severity: 'low' | 'medium' | 'high' | 'critical' | string;
+  message: string;
+  is_resolved: boolean;
+  created_at: string;
+  resolved_by?: string | null;
+  resolved_at?: string | null;
 }
 
 export interface ScoreBreakdownMR {
