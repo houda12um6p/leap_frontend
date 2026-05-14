@@ -316,6 +316,13 @@ export async function createCompteRenduFromFile(
   return res.json();
 }
 
+export async function forgotPassword(email: string): Promise<void> {
+  await request<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
 export function useSyncProject() {
   const qc = useQueryClient();
   return useMutation({
