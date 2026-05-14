@@ -177,7 +177,7 @@ function CompteRenduCard({ cr, expanded, onToggle }: {
 
           {cr.blocages.length > 0 && (
             <div style={{ marginBottom: 8 }}>
-              <SectionLabel>blocages · {cr.blocages.length}</SectionLabel>
+              <SectionLabel>blockers · {cr.blocages.length}</SectionLabel>
               {cr.blocages.map((b, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -286,9 +286,9 @@ export default function CompteRenduPanel({ projectId }: Props) {
         textTransform: 'uppercase', color: 'var(--leap-text-faint)',
         marginBottom: 18,
       }}>
-        compte rendus
+        meeting reports
         <span style={{ marginLeft: 'auto', color: 'var(--leap-text-dim)' }}>
-          analyse ia · expire apres 7 jours
+          ai analysis · expires after 7 days
         </span>
       </div>
 
@@ -307,16 +307,16 @@ export default function CompteRenduPanel({ projectId }: Props) {
           color: 'var(--leap-text-faint)',
           marginBottom: 12,
         }}>
-          nouveau compte rendu
+          new meeting report
         </div>
 
         {/* Tab switcher */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
           <button style={tabBtnStyle(tab === 'text')} onClick={() => setTab('text')}>
-            texte
+            text
           </button>
           <button style={tabBtnStyle(tab === 'file')} onClick={() => setTab('file')}>
-            fichier
+            file
           </button>
         </div>
 
@@ -325,7 +325,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
             <textarea
               value={text}
               onChange={e => setText(e.target.value)}
-              placeholder="Collez le texte du compte rendu ici…"
+              placeholder="Paste the meeting report text here…"
               rows={5}
               style={{
                 width: '100%', boxSizing: 'border-box',
@@ -369,7 +369,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
                   transition: 'all 0.15s',
                 }}
               >
-                {mutation.isPending ? 'analysing…' : 'analyser'}
+                {mutation.isPending ? 'analyzing…' : 'analyze'}
               </button>
             </div>
             {mutation.isError && (
@@ -382,7 +382,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
                 fontFamily: "'Geist Mono', monospace",
                 letterSpacing: '0.04em',
               }}>
-                {(mutation.error as Error)?.message ?? "erreur lors de l'analyse"}
+                {(mutation.error as Error)?.message ?? "analysis failed"}
               </div>
             )}
           </>
@@ -417,10 +417,10 @@ export default function CompteRenduPanel({ projectId }: Props) {
                 lineHeight: 2.2,
               }}>
                 {fileMutation.isPending
-                  ? 'extraction et analyse en cours…'
+                  ? 'extracting and analyzing…'
                   : (
                     <>
-                      glisser un fichier ici ou cliquer pour choisir
+                      drop a file here or click to browse
                       <br />
                       <span style={{ opacity: 0.6, fontSize: 9 }}>
                         pdf · docx · txt · max 10 mb
@@ -502,7 +502,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
                 color: 'var(--leap-text-faint)',
                 marginBottom: 8,
               }}>
-                historique · {expiredCRs.length}
+                history · {expiredCRs.length}
               </div>
               {displayedExpired.map(cr => (
                 <CompteRenduCard
@@ -529,7 +529,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
                     marginTop: 4,
                   }}
                 >
-                  {showAll ? 'voir moins' : `+${expiredCRs.length - 3} de plus`}
+                  {showAll ? 'show less' : `+${expiredCRs.length - 3} more`}
                 </button>
               )}
             </div>
@@ -546,7 +546,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
               border: '1px dashed var(--leap-border-soft)',
               borderRadius: 12,
             }}>
-              aucun compte rendu — collez le texte ou deposez un fichier ci-dessus
+              no meeting reports — paste text or drop a file above
             </div>
           )}
         </>
