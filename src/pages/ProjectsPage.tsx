@@ -116,14 +116,14 @@ export default function ProjectsPage() {
         <div style={{ position: 'relative', flex: '1 1 280px', minWidth: 220, maxWidth: 360 }}>
           <SearchIcon />
           <input
-            type="search"
+            type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects by name…"
             aria-label="Search projects"
             style={{
               width: '100%',
-              padding: '10px 14px 10px 36px',
+              padding: '10px 34px 10px 36px',
               borderRadius: 10,
               border: '1px solid var(--leap-border)',
               background: 'var(--leap-card-bg)',
@@ -136,6 +136,22 @@ export default function ProjectsPage() {
             onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.55)'; }}
             onBlur={(e)  => { e.currentTarget.style.borderColor = 'var(--leap-border)'; }}
           />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              style={{
+                position: 'absolute', right: 8, top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none', border: 'none',
+                cursor: 'pointer', fontSize: 14,
+                color: 'var(--color-text-secondary)',
+                padding: '2px 6px',
+              }}
+              aria-label="Effacer la recherche"
+            >
+              ×
+            </button>
+          )}
         </div>
 
         <FilterGroup label="Status">
@@ -145,7 +161,7 @@ export default function ProjectsPage() {
               selected={statusFilter === s}
               onClick={() => setStatusFilter(s)}
             >
-              {s === 'all' ? 'All' : s === 'active' ? 'Active' : 'Archived'}
+              {s === 'all' ? 'Tous' : s === 'active' ? 'Actif' : 'Archivé'}
             </FilterChip>
           ))}
         </FilterGroup>
@@ -155,19 +171,19 @@ export default function ProjectsPage() {
             selected={scoreSort === 'none'}
             onClick={() => setScoreSort('none')}
           >
-            Default
+            Plus récent
           </FilterChip>
           <FilterChip
             selected={scoreSort === 'best'}
             onClick={() => setScoreSort('best')}
           >
-            Best score
+            Meilleur score
           </FilterChip>
           <FilterChip
             selected={scoreSort === 'worst'}
             onClick={() => setScoreSort('worst')}
           >
-            Worst score
+            Pire score
           </FilterChip>
         </FilterGroup>
       </div>
@@ -191,7 +207,7 @@ export default function ProjectsPage() {
           </div>
         ) : visible.length === 0 ? (
           <div style={emptyStyle}>
-            No projects match the current search or filters.
+            Aucun projet ne correspond à la recherche ou aux filtres.
           </div>
         ) : (
           visible.map(({ project, contributors, open, tasks, score }) => (
