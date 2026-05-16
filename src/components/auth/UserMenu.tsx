@@ -52,17 +52,9 @@ export function UserMenu() {
   };
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        position: 'fixed',
-        top: 22,
-        right: 22,
-        zIndex: 50,
-      }}
+      style={{ position: 'relative' }}
     >
       <motion.button
         type="button"
@@ -72,45 +64,10 @@ export function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Signed in as ${user.email}`}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '6px 12px 6px 6px',
-          borderRadius: 999,
-          border: '1px solid var(--leap-border)',
-          background: 'var(--leap-card-bg)',
-          backdropFilter: 'blur(28px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(160%)',
-          color: 'var(--leap-text)',
-          cursor: 'pointer',
-          boxShadow:
-            '0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 60px rgba(0, 0, 0, 0.18)',
-        }}
+        className="leap-user-pill"
       >
-        <span
-          style={{
-            width: 28, height: 28, borderRadius: 999,
-            display: 'grid', placeItems: 'center',
-            background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.32), rgba(94, 234, 212, 0.10))',
-            color: 'var(--leap-accent-cyan)',
-            fontFamily: "'Geist Mono', monospace",
-            fontSize: 11, fontWeight: 600,
-            border: '1px solid rgba(94, 234, 212, 0.32)',
-          }}
-        >
-          {initials}
-        </span>
-        <span style={{
-          fontSize: 13, fontWeight: 500,
-          letterSpacing: '-0.005em',
-          maxWidth: 160,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}>
-          {user.name || user.email}
-        </span>
+        <span className="leap-user-avatar">{initials}</span>
+        <span className="leap-user-name">{user.name || user.email}</span>
       </motion.button>
 
       <AnimatePresence>
@@ -230,6 +187,6 @@ export function UserMenu() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

@@ -1,10 +1,9 @@
-import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useSnapshot } from 'valtio';
 import Background from './components/Background';
 import { SectionBar } from './components/dashboard/SectionBar';
 import { RequireAuth } from './components/auth/RequireAuth';
-import { UserMenu } from './components/auth/UserMenu';
 import { authState, bootstrapAuth, logout } from './lib/auth';
 
 const Welcome           = lazy(() => import('./pages/Welcome'));
@@ -12,6 +11,37 @@ const Login             = lazy(() => import('./pages/Login'));
 const DashboardShell    = lazy(() => import('./pages/DashboardShell'));
 const ProjectsPage      = lazy(() => import('./pages/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
+
+function LocationAwareBackground() {
+  const { pathname } = useLocation();
+  const [isDark, setIsDark] = useState<boolean>(
+    document.documentElement.getAttribute('data-theme') !== 'light'
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') !== 'light');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const isWelcome = pathname === '/';
+  let bgOpacity: number;
+  if (isWelcome) {
+    bgOpacity = 1.0;
+  } else if (isDark) {
+    bgOpacity = 0.18;
+  } else {
+    bgOpacity = 0.65;
+  }
+
+  return (
+    <div style={{ opacity: bgOpacity, transition: 'opacity 400ms ease' }}>
+      <Background />
+    </div>
+  );
+}
 
 function RouteFallback() {
   return (
@@ -63,9 +93,8 @@ function AppRoutes() {
 function WithSectionBar({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {children}
-      <UserMenu />
       <SectionBar />
+      {children}
     </>
   );
 }
@@ -88,7 +117,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthBootstrap />
-      <Background />
+      <LocationAwareBackground />
       <Suspense fallback={<RouteFallback />}>
         <AppRoutes />
       </Suspense>

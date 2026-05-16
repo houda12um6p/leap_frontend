@@ -70,19 +70,7 @@ export default function ProjectsPage() {
           }}>
             Projects · workspace
           </div>
-          <h1 style={{
-            margin: 0,
-            fontSize: 'clamp(28px, 3.6vw, 40px)',
-            fontWeight: 600,
-            letterSpacing: '-0.035em',
-            lineHeight: 1,
-            background: 'linear-gradient(180deg, var(--leap-text) 0%, var(--leap-text-dim) 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-          }}>
-            All projects
-          </h1>
+          <h1 className="page-title">All projects</h1>
         </div>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
@@ -147,7 +135,7 @@ export default function ProjectsPage() {
                 color: 'var(--color-text-secondary)',
                 padding: '2px 6px',
               }}
-              aria-label="Effacer la recherche"
+              aria-label="Clear search"
             >
               ×
             </button>
@@ -161,7 +149,7 @@ export default function ProjectsPage() {
               selected={statusFilter === s}
               onClick={() => setStatusFilter(s)}
             >
-              {s === 'all' ? 'Tous' : s === 'active' ? 'Actif' : 'Archivé'}
+              {s === 'all' ? 'All' : s === 'active' ? 'Active' : 'Archived'}
             </FilterChip>
           ))}
         </FilterGroup>
@@ -171,19 +159,19 @@ export default function ProjectsPage() {
             selected={scoreSort === 'none'}
             onClick={() => setScoreSort('none')}
           >
-            Plus récent
+            Most recent
           </FilterChip>
           <FilterChip
             selected={scoreSort === 'best'}
             onClick={() => setScoreSort('best')}
           >
-            Meilleur score
+            Best score
           </FilterChip>
           <FilterChip
             selected={scoreSort === 'worst'}
             onClick={() => setScoreSort('worst')}
           >
-            Pire score
+            Worst score
           </FilterChip>
         </FilterGroup>
       </div>
@@ -207,7 +195,7 @@ export default function ProjectsPage() {
           </div>
         ) : visible.length === 0 ? (
           <div style={emptyStyle}>
-            Aucun projet ne correspond à la recherche ou aux filtres.
+            No projects match the search or filters.
           </div>
         ) : (
           visible.map(({ project, contributors, open, tasks, score }) => (

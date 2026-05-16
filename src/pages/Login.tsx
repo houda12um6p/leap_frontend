@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, Variants } from 'framer-motion';
+import { HelmMark } from '../components/HelmMark';
 import { toast } from 'sonner';
 import { login, register } from '../lib/auth';
 import { forgotPassword } from '../lib/api';
@@ -78,7 +79,30 @@ export default function Login() {
   };
 
   return (
-    <main className="welcome-shell" onKeyDown={onKeyDown}>
+    <motion.div
+      className="login-root"
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onKeyDown={onKeyDown}
+    >
+      <div className="login-logo-anchor">
+        <HelmMark
+          size={72}
+          layoutId="helm-mark"
+          onClick={() => navigate('/')}
+        />
+      </div>
+
+      <motion.div
+        className="login-form-center"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.3,
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        }}
+      >
       <motion.section
         key={view}
         className="welcome-stage"
@@ -313,12 +337,19 @@ export default function Login() {
                 </>
               )}
               <span style={{ opacity: 0.4 }}>·</span>
-              <Link to="/" style={linkButton as React.CSSProperties}>Back home</Link>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                style={linkButton}
+              >
+                Back home
+              </button>
             </motion.div>
           </>
         )}
       </motion.section>
-    </main>
+      </motion.div>
+    </motion.div>
   );
 }
 

@@ -6,7 +6,6 @@ import { BentoGrid, BentoCell } from '../components/dashboard/BentoGrid';
 import { StatTile } from '../components/dashboard/StatTile';
 import { TopDevelopersTile } from '../components/dashboard/TopDevelopersTile';
 import { CriticalFeedTile } from '../components/dashboard/CriticalFeedTile';
-import { ProjectsSummaryTile } from '../components/dashboard/ProjectsSummaryTile';
 import { BentoSkeleton } from '../components/dashboard/CardSkeleton';
 import type { DeveloperScore, MergeRequestSummary } from '../lib/types';
 
@@ -74,13 +73,29 @@ export default function DashboardShell() {
     const totalAlerts    = activeBundles.reduce((s, x) => s + (x.overview?.unresolved_alerts ?? 0), 0);
     const totalEngineers = new Set(activeBundles.flatMap((x) => x.scores.map((d) => d.user_id))).size;
 
-    return { activeProjects, byProject, globalDevs, criticalPRs, totalMRs, totalOpenMRs, totalAlerts, totalEngineers };
+    return { activeProjects, globalDevs, criticalPRs, totalMRs, totalOpenMRs, totalAlerts, totalEngineers };
   }, [projects, bundles]);
 
   const isInitialLoad = projectsQ.isLoading || (projects.length > 0 && bundles.every((b) => b.isLoading));
 
+  const plural = (n: number, word: string): string =>
+    n === 1 ? `1 ${word}` : `${n} ${word}s`;
+
+  const getWeekNumber = (d: Date): number => {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  };
+  const now = new Date();
+  const days: string[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const months: string[] = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const dateStrip = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} · ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} · W${getWeekNumber(now)}`;
+
   return (
     <main className="dashboard-shell">
+      <div className="leap-date-bar">{dateStrip}</div>
       <motion.header
         className="dashboard-header"
         initial={{ opacity: 0, y: -10 }}
@@ -122,7 +137,7 @@ export default function DashboardShell() {
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               color: 'transparent',
-            }}>signal</em>.
+            }}>signal.</em>
           </h1>
         </div>
       </motion.header>
@@ -136,16 +151,16 @@ export default function DashboardShell() {
               <StatTile
                 label="Active projects"
                 value={aggregates.activeProjects.length}
-                unit="repos"
+                unit={aggregates.activeProjects.length === 1 ? 'repo' : 'repos'}
                 accent="var(--leap-accent-cyan)"
-                hint={`${aggregates.totalMRs} merge requests across active projects`}
+                hint={plural(aggregates.totalMRs, 'merge request') + ' across active projects'}
               />
             </BentoCell>
             <BentoCell col={3} colMd={6}>
               <StatTile
                 label="Engineers"
                 value={aggregates.totalEngineers}
-                unit="contributing"
+                unit={aggregates.totalEngineers === 1 ? 'engineer' : 'engineers'}
                 accent="var(--leap-accent-purple)"
                 hint="Developers with at least one MR in this project set."
               />
@@ -175,9 +190,6 @@ export default function DashboardShell() {
               <CriticalFeedTile prs={aggregates.criticalPRs} />
             </BentoCell>
 
-            <BentoCell col={12}>
-              <ProjectsSummaryTile rows={aggregates.byProject} />
-            </BentoCell>
           </>
         )}
       </BentoGrid>

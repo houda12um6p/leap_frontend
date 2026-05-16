@@ -78,7 +78,7 @@ function CompteRenduCard({ cr, expanded, onToggle }: {
             fontSize: 12.5, color: 'var(--leap-text-dim)',
             letterSpacing: '-0.01em',
           }}>
-            {new Date(cr.created_at).toLocaleDateString('fr-FR', {
+            {new Date(cr.created_at).toLocaleDateString('en-GB', {
               day: 'numeric', month: 'long', year: 'numeric',
             })}
           </span>
@@ -86,7 +86,7 @@ function CompteRenduCard({ cr, expanded, onToggle }: {
             fontSize: 10, color: 'var(--leap-text-faint)',
             fontFamily: "'Geist Mono', monospace",
           }}>
-            {new Date(cr.created_at).toLocaleTimeString('fr-FR', {
+            {new Date(cr.created_at).toLocaleTimeString('en-GB', {
               hour: '2-digit', minute: '2-digit',
             })}
           </span>
@@ -451,7 +451,7 @@ export default function CompteRenduPanel({ projectId }: Props) {
                 fontFamily: "'Geist Mono', monospace",
                 letterSpacing: '0.04em',
               }}>
-                {(fileMutation.error as Error)?.message ?? "erreur lors de l'analyse"}
+                {(fileMutation.error as Error)?.message ?? "analysis failed"}
               </div>
             )}
           </>

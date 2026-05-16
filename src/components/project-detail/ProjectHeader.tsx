@@ -99,18 +99,8 @@ export function ProjectHeader({ project, overview }: Props) {
       </div>
 
       <h1
-        style={{
-          position: 'relative',
-          margin: '18px 0 6px',
-          fontSize: 'clamp(32px, 4.4vw, 52px)',
-          fontWeight: 600,
-          letterSpacing: '-0.04em',
-          lineHeight: 1.0,
-          background: 'linear-gradient(180deg, var(--leap-text) 0%, var(--leap-text-dim) 100%)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-        }}
+        className="page-title"
+        style={{ position: 'relative', margin: '18px 0 6px' }}
       >
         {project.name}
       </h1>

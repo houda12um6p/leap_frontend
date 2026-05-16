@@ -37,12 +37,8 @@ export function StatTile({
         <AnimatedNumber
           value={value}
           format={format}
+          className="leap-stat-value"
           style={{
-            fontFamily: "'Geist', system-ui",
-            fontSize: 44,
-            fontWeight: 600,
-            letterSpacing: '-0.04em',
-            lineHeight: 0.95,
             background: `linear-gradient(180deg, var(--leap-text) 0%, ${accent} 130%)`,
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',

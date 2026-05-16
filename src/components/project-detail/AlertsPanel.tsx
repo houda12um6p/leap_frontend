@@ -109,12 +109,12 @@ function ResolvedBadge({ alert }: { alert: Alert }) {
   const who = alert.resolved_by?.trim();
   const when = alert.resolved_at ? formatDate(alert.resolved_at, true) : null;
   const label = who && when
-    ? `Résolu par ${who} le ${when}`
+    ? `Resolved by ${who} on ${when}`
     : who
-      ? `Résolu par ${who}`
+      ? `Resolved by ${who}`
       : when
-        ? `Résolu le ${when}`
-        : 'Résolu';
+        ? `Resolved on ${when}`
+        : 'Resolved';
 
   return (
     <span style={{

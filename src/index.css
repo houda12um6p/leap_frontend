@@ -42,26 +42,26 @@
 }
 
 [data-theme='light'] {
-  --leap-bg:           #f6f5f0;
-  --leap-bg-deep:      #efece4;
-  --leap-text:         #0a1628;
-  --leap-text-dim:     rgba(10, 22, 40, 0.66);
-  --leap-text-faint:   rgba(10, 22, 40, 0.42);
-  --leap-border:       rgba(10, 22, 40, 0.12);
-  --leap-border-soft:  rgba(10, 22, 40, 0.06);
-  --leap-card-bg:      rgba(255, 255, 255, 0.62);
+  --leap-bg:           #f5f1e8;
+  --leap-bg-deep:      #ede8db;
+  --leap-text:         #1a1610;
+  --leap-text-dim:     rgba(26, 22, 16, 0.62);
+  --leap-text-faint:   rgba(26, 22, 16, 0.40);
+  --leap-border:       rgba(26, 22, 16, 0.10);
+  --leap-border-soft:  rgba(26, 22, 16, 0.05);
+  --leap-card-bg:      #faf7f0;
   --leap-card-bg-hero: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(247, 245, 240, 0.78) 100%);
-  --leap-card-bg-muted: rgba(255, 255, 255, 0.5);
-  --leap-input-bg:     rgba(255, 255, 255, 0.72);
-  --leap-skeleton-mid: rgba(10, 22, 40, 0.10);
-  --leap-skeleton-end: rgba(10, 22, 40, 0.04);
-  --leap-vignette:     rgba(10, 22, 40, 0.18);
-  --leap-surface-soft:  rgba(10, 22, 40, 0.035);
-  --leap-surface-wash:  rgba(10, 22, 40, 0.06);
-  --leap-accent-cyan:   #0d8050;
-  --leap-accent-amber:  #c2410c;
-  --leap-accent-purple: #6d28d9;
-  --leap-accent-warn:   #b91c1c;
+  --leap-card-bg-muted: #f1ece0;
+  --leap-input-bg:     #fdfaf3;
+  --leap-skeleton-mid: rgba(26, 22, 16, 0.10);
+  --leap-skeleton-end: rgba(26, 22, 16, 0.04);
+  --leap-vignette:     rgba(26, 22, 16, 0.18);
+  --leap-surface-soft:  rgba(26, 22, 16, 0.03);
+  --leap-surface-wash:  rgba(26, 22, 16, 0.05);
+  --leap-accent-cyan:   #0e8a6f;
+  --leap-accent-amber:  #b8530a;
+  --leap-accent-purple: #5b2bb8;
+  --leap-accent-warn:   #a51d3c;
 
   --leap-band-exceptional:        #0d8050;
   --leap-band-exceptional-soft:   rgba(13, 128, 80, 0.16);
@@ -94,7 +94,6 @@ body,
   padding: 0;
   width: 100%;
   height: 100%;
-  background: var(--leap-bg-deep);
   color: var(--leap-text);
   font-family: 'Geist', 'Inter', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
   font-feature-settings: 'cv11', 'ss01', 'ss03';
@@ -102,6 +101,20 @@ body,
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
+
+html, body { background: var(--leap-bg-deep); }
+#root       { background: transparent; }
+
+[data-theme='light'] body {
+  background:
+    radial-gradient(
+      120% 80% at 50% -10%,
+      #fdfaf3 0%,
+      transparent 60%
+    ),
+    var(--leap-bg);
+}
+[data-theme='light'] #root { background: transparent; }
 
 body {
   min-height: 100vh;
@@ -325,6 +338,71 @@ button {
   .welcome-meta { padding: 0 18px; font-size: 10px; }
 }
 
+/* --- Welcome hero layout (HelmLogo centered) --- */
+
+.welcome-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+
+.welcome-wordmark {
+  display: flex;
+  gap: 0.02em;
+  font-family: 'Geist', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(52px, 10vw, 96px);
+  letter-spacing: -0.045em;
+  line-height: 1;
+  background: linear-gradient(180deg, var(--leap-text) 0%, var(--leap-text-dim) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.welcome-tagline {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--leap-text-faint);
+  margin: 0;
+  text-align: center;
+}
+
+/* --- Login page layout --- */
+
+.login-root {
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo-anchor {
+  position: absolute;
+  top: 28px;
+  left: 36px;
+  z-index: 2;
+}
+
+.login-form-center {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
 /* ==========================================================================
    Background canvas
    ========================================================================== */
@@ -373,7 +451,7 @@ button {
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  padding: 32px 36px 140px;
+  padding: 80px 36px 80px;
   max-width: 1640px;
   margin: 0 auto;
 }
@@ -484,6 +562,59 @@ button {
   background-clip: text;
   color: transparent;
 }
+[data-theme='light'] .dashboard-title em {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: initial;
+  color: var(--leap-accent-cyan);
+}
+
+.leap-stat-value {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 44px;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'cv11', 'ss01';
+}
+[data-theme='light'] .leap-stat-value {
+  background: linear-gradient(
+    180deg,
+    var(--leap-text) 0%,
+    rgba(26, 22, 16, 0.55) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.page-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    180deg,
+    var(--leap-text) 0%,
+    var(--leap-text-dim) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+}
+[data-theme='light'] .page-title {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: initial;
+  color: var(--leap-text);
+}
 
 .dashboard-sub {
   margin: 0;
@@ -553,6 +684,15 @@ button {
 }
 .leap-card:hover { border-color: var(--leap-border); }
 
+[data-theme='light'] .leap-card {
+  background: var(--leap-card-bg);
+  border: 1px solid var(--leap-border-soft);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.60) inset,
+    0 1px 2px rgba(26, 22, 16, 0.04),
+    0 8px 24px rgba(26, 22, 16, 0.03);
+}
+
 /* ==========================================================================
    Skeleton shimmer
    ========================================================================== */
@@ -575,67 +715,281 @@ button {
 }
 
 /* ==========================================================================
-   Section bar (floating bottom-center nav)
+   Masthead (fixed top navigation bar)
    ========================================================================== */
 
-.section-bar {
+.leap-masthead {
   position: fixed;
-  bottom: 26px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  padding: 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+  border-bottom: 1px solid var(--leap-border-soft);
+  background: rgba(5, 8, 16, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+[data-theme='light'] .leap-masthead {
+  background: rgba(250, 247, 240, 0.85);
+  border-bottom: 1px solid var(--leap-border-soft);
+}
+
+.leap-masthead-logo {
   display: inline-flex;
-  gap: 4px;
-  padding: 6px;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+
+.leap-masthead-diamond {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, var(--leap-accent-cyan), var(--leap-accent-amber));
+  box-shadow: 0 0 10px rgba(94, 234, 212, 0.50);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.leap-masthead-wordmark {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: var(--leap-text);
+  text-transform: uppercase;
+}
+
+.leap-masthead-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.leap-masthead-nav-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--leap-text-dim);
+  transition: color 200ms ease;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.leap-masthead-nav-item:hover { color: var(--leap-text); }
+.leap-masthead-nav-item.active { color: var(--leap-accent-cyan); }
+
+.leap-nav-underline {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--leap-accent-cyan);
+  border-radius: 999px;
+}
+
+.leap-date-bar {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--leap-text-faint);
+  margin: -20px -36px 20px;
+  padding: 8px 36px;
+  border-bottom: 1px solid var(--leap-border-soft);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.leap-masthead-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Command palette trigger */
+.leap-cmd-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--leap-border-soft);
+  background: var(--leap-surface-soft);
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease;
+  color: inherit;
+}
+.leap-cmd-trigger:hover {
+  border-color: var(--leap-border);
+  background: var(--leap-surface-wash);
+}
+
+.leap-cmd-icon {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--leap-text-faint);
+  border: 1px solid var(--leap-border);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+.leap-cmd-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--leap-text-faint);
+  letter-spacing: 0.05em;
+}
+
+/* Command palette modal */
+.leap-cmd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.50);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20vh;
+  backdrop-filter: blur(4px);
+}
+
+.leap-cmd-modal {
+  width: 560px;
+  border-radius: 12px;
   border: 1px solid var(--leap-border);
   background: var(--leap-card-bg);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border-radius: 999px;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 18px 60px rgba(0, 0, 0, 0.45);
-  z-index: 50;
-}
-[data-theme='light'] .section-bar {
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.55) inset,
-    0 18px 60px rgba(10, 22, 40, 0.10);
+  backdrop-filter: blur(24px);
+  overflow: hidden;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.40);
 }
 
-.section-bar-item {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  padding: 0;
-  border-radius: 999px;
+.leap-cmd-input {
+  width: 100%;
+  padding: 20px 24px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 15px;
   background: transparent;
-  font-family: 'Geist', sans-serif;
+  border: none;
+  border-bottom: 1px solid var(--leap-border-soft);
+  color: var(--leap-text);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.leap-cmd-input::placeholder {
+  color: var(--leap-text-faint);
+}
+
+.leap-cmd-hint {
+  padding: 12px 24px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--leap-text-faint);
+  text-transform: uppercase;
+}
+
+.leap-cmd-results {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.leap-cmd-empty {
+  padding: 16px 24px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  color: var(--leap-text-faint);
+  letter-spacing: 0.08em;
+}
+
+.leap-cmd-result {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 24px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--leap-border-soft);
+  transition: background 150ms ease;
+}
+.leap-cmd-result:last-child {
+  border-bottom: none;
+}
+.leap-cmd-result:hover,
+.leap-cmd-result.selected {
+  background: var(--leap-surface-soft);
+}
+
+.leap-cmd-result-name {
+  font-family: 'Geist Mono', monospace;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: -0.005em;
-  color: var(--leap-text-dim);
-  cursor: pointer;
-  transition: color 200ms ease;
+  color: var(--leap-text);
 }
-.section-bar-item:hover { color: var(--leap-text); }
-.section-bar-item.is-active { color: var(--leap-accent-cyan); }
 
-.section-bar-content {
-  position: relative;
-  z-index: 2;
-  display: inline-flex;
+.leap-cmd-result-repo {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--leap-text-faint);
+  letter-spacing: 0.05em;
+}
+
+/* User pill (masthead avatar) */
+.leap-user-pill {
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--leap-text);
+  transition: background 200ms ease;
+}
+.leap-user-pill:hover {
+  background: var(--leap-surface-soft);
 }
 
-.section-bar-pill {
-  position: absolute;
-  inset: 0;
+.leap-user-avatar {
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(94, 234, 212, 0.18) 0%, rgba(94, 234, 212, 0.04) 100%);
-  border: 1px solid rgba(94, 234, 212, 0.28);
-  z-index: 1;
+  background: var(--leap-surface-wash);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--leap-text);
+  flex-shrink: 0;
+}
+
+.leap-user-name {
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  color: var(--leap-text-dim);
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==========================================================================
@@ -764,4 +1118,18 @@ button {
 }
 @keyframes leap-spin {
   to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Light mode — serif italic em: solid ink, no gradient
+   ========================================================================== */
+
+[data-theme='light'] em,
+[data-theme='light'] .serif-em {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: initial;
+  color: var(--leap-accent-cyan);
+  font-style: italic;
 }

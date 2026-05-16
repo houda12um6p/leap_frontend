@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -16,57 +16,36 @@ interface Props {
   project_score: number;
 }
 
-const EditIcon = ({ size = 12 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-       strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M12 20h9" />
-    <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-  </svg>
-);
-
-const TrashIcon = ({ size = 12 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-       strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-    <path d="M10 11v6M14 11v6" />
-    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-  </svg>
-);
-
 export function ProjectCard({
   project, contributors, open_mrs, pending_tasks, project_score,
 }: Props) {
   const tone = scoreBand(project_score);
   const archived = project.status === 'archived';
   const [editOpen, setEditOpen] = useState(false);
-  const [armedDelete, setArmedDelete] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const del = useDeleteProject();
 
-  const onEdit = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setEditOpen(true);
-  };
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-  const onDelete = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!armedDelete) {
-      setArmedDelete(true);
-      window.setTimeout(() => setArmedDelete(false), 4000);
-      return;
-    }
-    try {
-      await del.mutateAsync(project.id);
-      toast.success(`Deleted ${project.name}`);
-    } catch (err) {
-      toast.error('Could not delete project.', {
-        description: (err as Error).message ?? 'Network error.',
+  const onEdit = () => { setEditOpen(true); };
+
+  const onDelete = () => {
+    del.mutateAsync(project.id)
+      .then(() => { toast.success(`Deleted ${project.name}`); })
+      .catch((err: unknown) => {
+        toast.error('Could not delete project.', {
+          description: (err as Error).message ?? 'Network error.',
+        });
       });
-    } finally {
-      setArmedDelete(false);
-    }
   };
 
   return (
@@ -127,26 +106,56 @@ export function ProjectCard({
           <ExternalLinkIcon size={10} />
           repo
         </span>
-        <div style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}>
+
+        <div ref={menuRef} style={{ marginLeft: 'auto', position: 'relative' }}>
           <button
             type="button"
-            onClick={onEdit}
-            title="Edit project"
-            aria-label={`Edit ${project.name}`}
-            style={iconBtnStyle('var(--leap-accent-cyan)')}
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
+            aria-label="Project options"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--leap-text-faint)',
+              fontSize: '1.2rem',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '0.375rem',
+            }}
           >
-            <EditIcon size={12} />
+            ⋯
           </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={del.isPending}
-            title={armedDelete ? 'Click again to confirm' : 'Delete project'}
-            aria-label={`Delete ${project.name}`}
-            style={iconBtnStyle(armedDelete ? '#f87171' : 'var(--leap-accent-warn)', armedDelete)}
-          >
-            <TrashIcon size={12} />
-          </button>
+
+          {menuOpen && (
+            <div style={{
+              position: 'absolute',
+              top: '2rem',
+              right: 0,
+              background: 'var(--leap-card-bg)',
+              border: '1px solid var(--leap-border)',
+              borderRadius: '0.5rem',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.20)',
+              minWidth: '160px',
+              zIndex: 50,
+              overflow: 'hidden',
+              backdropFilter: 'blur(12px)',
+            }}>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); onEdit(); }}
+                style={menuItemStyle('var(--leap-text)')}
+              >
+                ✏️ Edit project
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); onDelete(); }}
+                disabled={del.isPending}
+                style={menuItemStyle('var(--leap-accent-warn)')}
+              >
+                🗑 Delete project
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -233,18 +242,20 @@ export function ProjectCard({
   );
 }
 
-function iconBtnStyle(accent: string, active?: boolean): React.CSSProperties {
+function menuItemStyle(color: string): React.CSSProperties {
   return {
-    width: 28,
-    height: 28,
-    display: 'inline-grid',
-    placeItems: 'center',
-    borderRadius: 8,
-    border: `1px solid ${active ? accent : 'var(--leap-border)'}`,
-    background: active ? `color-mix(in srgb, ${accent} 14%, transparent)` : 'var(--leap-surface-soft)',
-    color: active ? accent : 'var(--leap-text-dim)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    width: '100%',
+    padding: '0.625rem 1rem',
+    background: 'none',
+    border: 'none',
     cursor: 'pointer',
-    transition: 'background 200ms ease, border-color 200ms ease, color 200ms ease',
+    fontSize: '0.875rem',
+    fontFamily: 'var(--font-geist-mono, monospace)',
+    color,
+    textAlign: 'left',
   };
 }
 

@@ -63,15 +63,6 @@ export function AddProjectModal() {
       onClose={() => { closeAddProject(); reset(); }}
       title="Add a new project"
     >
-      <p style={{
-        margin: '0 0 18px',
-        color: 'var(--leap-text-dim)',
-        fontSize: 13, lineHeight: 1.5,
-      }}>
-        Paste your repository URL — LEAP will fan out to GitHub & Jira sync once
-        you land in the project workspace.
-      </p>
-
       <label style={labelStyle}>Project name</label>
       <input
         value={name}

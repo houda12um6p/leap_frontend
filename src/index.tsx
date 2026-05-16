@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { useSnapshot } from 'valtio';
 
 // Geist — self-hosted via @fontsource (no external request).
 import '@fontsource/geist-sans/400.css';
@@ -16,19 +17,17 @@ import '@fontsource/instrument-serif/400-italic.css';
 import './index.css';
 import App from './App';
 import { queryClient } from './lib/queryClient';
-import { initTheme } from './lib/theme';
+import { initTheme, themeState } from './lib/theme';
 
 initTheme();
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+function AppRoot(): React.ReactElement {
+  const snap = useSnapshot(themeState);
+  return (
+    <>
       <App />
       <Toaster
-        theme="dark"
+        theme={snap.theme as 'dark' | 'light'}
         position="top-right"
         toastOptions={{
           style: {
@@ -39,6 +38,17 @@ root.render(
           },
         }}
       />
+    </>
+  );
+}
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AppRoot />
     </QueryClientProvider>
   </React.StrictMode>
 );

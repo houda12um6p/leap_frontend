@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Helm — Logo preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" />
+<style>
+  html, body { margin: 0; padding: 0; font-family: 'Geist', system-ui, sans-serif; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+  .pane { display: flex; flex-direction: column; gap: 40px; padding: 56px 48px; }
+  .dark { background: #050810; color: #f4f4f5; }
+  .light { background: #f5f1e8; color: #1a1610; }
+  .tag {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 8px;
+  }
+  .stage {
+    padding: 28px 32px;
+    border-radius: 14px;
+    border: 1px solid currentColor;
+    border-color: rgba(255,255,255,0.10);
+  }
+  .light .stage { border-color: rgba(13,27,42,0.10); background: #faf7f0; }
+  .dark .stage { background: rgba(15,18,28,0.55); }
+  .stage img { display: block; max-width: 100%; }
+  .scale-row { display: flex; align-items: center; gap: 28px; }
+  .nav-demo {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 22px;
+    border: 1px solid currentColor;
+    border-color: rgba(255,255,255,0.10);
+    border-radius: 10px;
+  }
+  .light .nav-demo { border-color: rgba(13,27,42,0.10); }
+  .nav-demo img { height: 28px; }
+  .fav-tab {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px;
+    border-radius: 8px 8px 0 0;
+    background: rgba(255,255,255,0.06);
+    font-size: 11.5px;
+    border: 1px solid rgba(255,255,255,0.10); border-bottom: none;
+  }
+  .light .fav-tab { background: #fff; border-color: rgba(13,27,42,0.10); }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="pane dark">
+    <div>
+      <div class="tag">Lockup · dark</div>
+      <div class="stage" style="text-align:center">
+        <img src="lockup/helm-lockup-dark.svg" alt="helm." style="height:120px"/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">Wordmark only · dark</div>
+      <div class="stage" style="text-align:center">
+        <img src="wordmark/helm-wordmark-dark.svg" alt="helm." style="height:120px"/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">Scale test · dark</div>
+      <div class="stage scale-row">
+        <img src="mark/helm-mark-dark.svg" style="height:96px" alt=""/>
+        <img src="mark/helm-mark-dark.svg" style="height:48px" alt=""/>
+        <img src="mark/helm-mark-dark.svg" style="height:24px" alt=""/>
+        <img src="mark/helm-mark-dark.svg" style="height:16px" alt=""/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">In a navbar · dark</div>
+      <div class="nav-demo">
+        <img src="lockup/helm-lockup-dark.svg" alt="helm."/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">Favicon · dark</div>
+      <div class="fav-tab">
+        <img src="favicon/favicon-32.svg" style="height:14px" alt=""/>
+        <span>helm. · Today's signal</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane light">
+    <div>
+      <div class="tag">Lockup · light</div>
+      <div class="stage" style="text-align:center">
+        <img src="lockup/helm-lockup-light.svg" alt="helm." style="height:120px"/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">Wordmark only · light</div>
+      <div class="stage" style="text-align:center">
+        <img src="wordmark/helm-wordmark-light.svg" alt="helm." style="height:120px"/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">Scale test · light</div>
+      <div class="stage scale-row">
+        <img src="mark/helm-mark-light.svg" style="height:96px" alt=""/>
+        <img src="mark/helm-mark-light.svg" style="height:48px" alt=""/>
+        <img src="mark/helm-mark-light.svg" style="height:24px" alt=""/>
+        <img src="mark/helm-mark-light.svg" style="height:16px" alt=""/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">In a navbar · light</div>
+      <div class="nav-demo">
+        <img src="lockup/helm-lockup-light.svg" alt="helm."/>
+      </div>
+    </div>
+    <div>
+      <div class="tag">Favicon · light</div>
+      <div class="fav-tab">
+        <img src="favicon/favicon-32.svg" style="height:14px" alt=""/>
+        <span>helm. · Today's signal</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

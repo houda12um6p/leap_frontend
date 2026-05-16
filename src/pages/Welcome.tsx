@@ -1,98 +1,72 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion, Variants } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useSnapshot } from 'valtio';
+import { motion, Variants } from 'framer-motion';
 import { sessionState } from '../store';
 import { authState } from '../lib/auth';
+import { HelmMark } from '../components/HelmMark';
 
 const container: Variants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.16,
-      delayChildren: 0.25,
-    },
-  },
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
 };
-
 const item: Variants = {
-  hidden: { opacity: 0, y: 22, filter: 'blur(10px)' },
-  show: {
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: {
-      duration: 1.0,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
-
-const meta: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { duration: 1.4, delay: 1.4, ease: 'easeOut' },
-  },
+  hidden: { opacity: 0, y: 14, filter: 'blur(6px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };
 
 export default function Welcome() {
-  const handleEnter = () => {
-    sessionState.hasEnteredApp = true;
-  };
-
-  // Read-only snapshot so the component re-renders if state changes.
+  const navigate = useNavigate();
   useSnapshot(sessionState);
   const auth = useSnapshot(authState);
-  const ctaTarget = auth.token && auth.user ? '/dashboard' : '/login';
-  const ctaLabel  = auth.token && auth.user ? 'Enter dashboard' : 'Sign in';
+  const target = auth.token && auth.user ? '/dashboard' : '/login';
+  const label  = auth.token && auth.user ? 'Enter dashboard' : 'Sign in';
+
+  const handleCta = () => {
+    sessionState.hasEnteredApp = true;
+    navigate(target);
+  };
 
   return (
-    <main className="welcome-shell">
-      <motion.section
-        className="welcome-stage"
-        variants={container}
-        initial="hidden"
-        animate="show"
-      >
-        <motion.div className="welcome-eyebrow" variants={item}>
-          <span className="dot" />
-           &nbsp;//&nbsp; &nbsp;//&nbsp; 
+    <motion.div
+      className="welcome-root"
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="welcome-center">
+        <HelmMark size={140} layoutId="helm-mark" />
+
+        <motion.div
+          className="welcome-wordmark"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {'HELM'.split('').map((ch, i) => (
+            <motion.span key={i} variants={item}>{ch}</motion.span>
+          ))}
         </motion.div>
 
-        <motion.h1 className="welcome-title" variants={item}>
-          &nbsp;<em>LEAP</em>
-        </motion.h1>
-
-        <motion.p className="welcome-subtitle" variants={item}>
-          Your engineering health, at a glance.
+        <motion.p
+          className="welcome-tagline"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          Intelligent Project Tracking
         </motion.p>
 
-        <motion.div variants={item}>
-          <Link
-            to={ctaTarget}
-            className="welcome-cta"
-            onClick={handleEnter}
-            aria-label={ctaLabel}
-          >
-            <span>{ctaLabel}</span>
-            <span className="arrow" aria-hidden="true">→</span>
-          </Link>
-        </motion.div>
-      </motion.section>
-
-      <motion.div
-        className="welcome-meta"
-        variants={meta}
-        initial="hidden"
-        animate="show"
-        aria-hidden="true"
-      >
-        <span>OCPS / LEAP</span>
-        <span>· · ·</span>
-        <span>Build 0.1 · 2026</span>
-      </motion.div>
-    </main>
+        <motion.button
+          className="welcome-cta"
+          onClick={handleCta}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <span>{label}</span>
+          <span className="arrow" aria-hidden="true">→</span>
+        </motion.button>
+      </div>
+    </motion.div>
   );
 }

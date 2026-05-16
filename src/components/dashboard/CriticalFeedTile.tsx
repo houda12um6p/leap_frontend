@@ -1,9 +1,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CardShell } from './CardShell';
-import { Pill } from '../ui/Pill';
 import { GitBranchIcon } from '../ui/Icon';
-import { MergeRequestSummary, scoreBand } from '../../lib/types';
+import { MergeRequestSummary } from '../../lib/types';
+
+type SeverityLevel = 0 | 1 | 3 | 5;
+
+const severityFromScore = (score: number): SeverityLevel => {
+  if (score >= 700) return 0;
+  if (score >= 500) return 1;
+  if (score >= 250) return 3;
+  return 5;
+};
+
+const dotColor = (sev: SeverityLevel): string => {
+  if (sev === 0) return 'var(--leap-accent-cyan)';
+  if (sev === 1) return 'var(--leap-accent-amber)';
+  if (sev === 3) return 'var(--leap-accent-warn)';
+  return '#ff4d6d';
+};
+
+const dotShadow = (sev: SeverityLevel): string => {
+  if (sev === 0) return '0 0 6px rgba(94, 234, 212, 0.50)';
+  if (sev === 1) return '0 0 6px rgba(251, 191, 36, 0.50)';
+  if (sev === 3) return '0 0 6px rgba(248, 113, 113, 0.50)';
+  return '0 0 6px rgba(255, 77, 109, 0.60)';
+};
 
 interface Props {
   prs: Array<MergeRequestSummary & { project_name?: string }>;
@@ -29,7 +51,7 @@ export function CriticalFeedTile({ prs }: Props) {
 
       <ul style={{ margin: '18px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {ranked.map((pr) => {
-          const tone = scoreBand(pr.score);
+          const sev = severityFromScore(pr.score);
           return (
             <li key={pr.id}>
               <Link
@@ -53,7 +75,11 @@ export function CriticalFeedTile({ prs }: Props) {
                   e.currentTarget.style.borderColor = 'var(--leap-border-soft)';
                 }}
               >
-                <Pill color={tone.tone}>{Math.round(pr.score)}</Pill>
+                <span style={{
+                    width: 8, height: 8, borderRadius: 999, flexShrink: 0,
+                    background: dotColor(sev),
+                    boxShadow: dotShadow(sev),
+                  }} />
                 <span style={{ minWidth: 0, flex: 1 }}>
                   <span style={{
                     display: 'block',
