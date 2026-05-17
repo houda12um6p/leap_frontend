@@ -1,12 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Pill } from '../ui/Pill';
-import { ExternalLinkIcon } from '../ui/Icon';
+import { ExternalLinkIcon, TrashIcon } from '../ui/Icon';
 import { Project, scoreBand } from '../../lib/types';
 import { useDeleteProject } from '../../lib/api';
-import { EditProjectModal } from './EditProjectModal';
 
 interface Props {
   project: Project;
@@ -21,30 +20,26 @@ export function ProjectCard({
 }: Props) {
   const tone = scoreBand(project_score);
   const archived = project.status === 'archived';
-  const [editOpen, setEditOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [armed, setArmed] = useState(false);
   const del = useDeleteProject();
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+    if (!armed) return;
+    const t = window.setTimeout(() => setArmed(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [armed]);
 
-  const onEdit = () => { setEditOpen(true); };
-
-  const onDelete = () => {
+  const onDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!armed) { setArmed(true); return; }
     del.mutateAsync(project.id)
       .then(() => { toast.success(`Deleted ${project.name}`); })
       .catch((err: unknown) => {
         toast.error('Could not delete project.', {
           description: (err as Error).message ?? 'Network error.',
         });
+        setArmed(false);
       });
   };
 
@@ -107,56 +102,33 @@ export function ProjectCard({
           repo
         </span>
 
-        <div ref={menuRef} style={{ marginLeft: 'auto', position: 'relative' }}>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
-            aria-label="Project options"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--leap-text-faint)',
-              fontSize: '1.2rem',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '0.375rem',
-            }}
-          >
-            ⋯
-          </button>
-
-          {menuOpen && (
-            <div style={{
-              position: 'absolute',
-              top: '2rem',
-              right: 0,
-              background: 'var(--leap-card-bg)',
-              border: '1px solid var(--leap-border)',
-              borderRadius: '0.5rem',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.20)',
-              minWidth: '160px',
-              zIndex: 50,
-              overflow: 'hidden',
-              backdropFilter: 'blur(12px)',
-            }}>
-              <button
-                type="button"
-                onClick={() => { setMenuOpen(false); onEdit(); }}
-                style={menuItemStyle('var(--leap-text)')}
-              >
-                ✏️ Edit project
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMenuOpen(false); onDelete(); }}
-                disabled={del.isPending}
-                style={menuItemStyle('var(--leap-accent-warn)')}
-              >
-                🗑 Delete project
-              </button>
-            </div>
-          )}
-        </div>
+        <motion.button
+          type="button"
+          onClick={onDelete}
+          disabled={del.isPending}
+          whileTap={{ scale: 0.94 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 24 }}
+          aria-label={armed ? 'Click again to confirm delete' : 'Delete project'}
+          title={armed ? 'Click again to confirm' : 'Delete project'}
+          className="leap-card-delete"
+          style={{
+            marginLeft: 'auto',
+            position: 'relative',
+            zIndex: 2,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 30, height: 30,
+            borderRadius: 999,
+            cursor: del.isPending ? 'wait' : 'pointer',
+            border: `1px solid ${armed ? '#f87171' : 'transparent'}`,
+            background: armed ? 'color-mix(in srgb, #f87171 14%, transparent)' : 'transparent',
+            color: armed ? '#f87171' : 'var(--leap-text-faint)',
+            transition: 'background 200ms ease, border-color 200ms ease, color 200ms ease',
+          }}
+        >
+          <TrashIcon size={13} />
+        </motion.button>
       </div>
 
       <h3 style={{
@@ -233,30 +205,8 @@ export function ProjectCard({
         </div>
       </div>
 
-      <EditProjectModal
-        open={editOpen}
-        project={project}
-        onClose={() => setEditOpen(false)}
-      />
     </motion.div>
   );
-}
-
-function menuItemStyle(color: string): React.CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    width: '100%',
-    padding: '0.625rem 1rem',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    fontFamily: 'var(--font-geist-mono, monospace)',
-    color,
-    textAlign: 'left',
-  };
 }
 
 function Metric({ label, value }: { label: string; value: number }) {

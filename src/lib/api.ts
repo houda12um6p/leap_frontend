@@ -108,7 +108,7 @@ export function useJiraSprints(projectId: string | undefined) {
     enabled: !!projectId,
     queryFn: async () => {
       try {
-        const raw = await request<JiraSprint[] | { sprints: JiraSprint[] }>(`/jira/sprints`);
+        const raw = await request<JiraSprint[] | { sprints: JiraSprint[] }>(`/jira/sprints/${projectId}`);
         if (Array.isArray(raw)) return raw;
         return raw?.sprints ?? [];
       } catch {
@@ -196,6 +196,10 @@ export function usePerProjectBundles(projectIds: string[]): PerProjectBundle[] {
 export interface CreateProjectInput {
   name: string;
   repo_url: string;
+  jira_key?: string | null;
+  jira_base_url?: string | null;
+  jira_email?: string | null;
+  jira_api_token?: string | null;
 }
 
 export function useCreateProject() {
@@ -215,6 +219,10 @@ export interface UpdateProjectInput {
   name?: string;
   repo_url?: string;
   status?: 'active' | 'archived';
+  jira_key?: string | null;
+  jira_base_url?: string | null;
+  jira_email?: string | null;
+  jira_api_token?: string | null;
 }
 
 export function useUpdateProject() {

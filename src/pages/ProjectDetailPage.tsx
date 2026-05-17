@@ -56,7 +56,17 @@ export default function ProjectDetailPage() {
 
   return (
     <main className="dashboard-shell">
-      <ProjectHeader project={project} overview={overviewQ.data ?? null} />
+      <ProjectHeader
+        project={project}
+        overview={overviewQ.data ?? null}
+        isFetching={
+          (projectQ.isFetching && !projectQ.isLoading)  ||
+          (overviewQ.isFetching && !overviewQ.isLoading) ||
+          (devsQ.isFetching     && !devsQ.isLoading)     ||
+          (prsQ.isFetching      && !prsQ.isLoading)      ||
+          (jiraQ.isFetching     && !jiraQ.isLoading)
+        }
+      />
 
       <motion.section
         initial={{ opacity: 0, y: 12 }}

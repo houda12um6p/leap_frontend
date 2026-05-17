@@ -1,20 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Pill } from '../ui/Pill';
+import { Button } from '../ui/Button';
 import { ArrowLeftIcon, ExternalLinkIcon } from '../ui/Icon';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
 import { SyncMenu } from '../projects/SyncMenu';
 import { DeleteProjectButton } from '../projects/DeleteProjectButton';
+import { EditProjectModal } from '../projects/EditProjectModal';
 import { Project, ProjectOverview, scoreBand } from '../../lib/types';
+
+const PencilIcon = ({ size = 13 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+  </svg>
+);
 
 interface Props {
   project: Project;
   overview: ProjectOverview | null;
+  isFetching?: boolean;
 }
 
-export function ProjectHeader({ project, overview }: Props) {
+export function ProjectHeader({ project, overview, isFetching = false }: Props) {
   const tone = scoreBand(overview?.project_score ?? 0);
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
     <motion.header
@@ -92,11 +103,32 @@ export function ProjectHeader({ project, overview }: Props) {
           <ExternalLinkIcon size={11} />
         </a>
 
-        <div style={{ marginLeft: 'auto', display: 'inline-flex', gap: 8 }}>
+        {isFetching && (
+          <span className="leap-sync-pulse" aria-live="polite">
+            <span className="leap-sync-pulse__dot" />
+            Syncing
+          </span>
+        )}
+
+        <div style={{ marginLeft: 'auto', display: 'inline-flex', gap: 8, flexWrap: 'wrap' }}>
+          <Button
+            variant="glass"
+            size="sm"
+            icon={<PencilIcon size={13} />}
+            onClick={() => setEditOpen(true)}
+          >
+            Edit project
+          </Button>
           <DeleteProjectButton projectId={project.id} projectName={project.name} />
           <SyncMenu projectId={project.id} repoUrl={project.repo_url} />
         </div>
       </div>
+
+      <EditProjectModal
+        open={editOpen}
+        project={project}
+        onClose={() => setEditOpen(false)}
+      />
 
       <h1
         className="page-title"
@@ -109,7 +141,7 @@ export function ProjectHeader({ project, overview }: Props) {
         position: 'relative',
         marginTop: 22,
         display: 'grid',
-        gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
         gap: 18,
         borderTop: '1px solid var(--leap-border-soft)',
         paddingTop: 18,

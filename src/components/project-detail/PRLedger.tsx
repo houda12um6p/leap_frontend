@@ -44,25 +44,27 @@ export function PRLedger({ prs }: Props) {
               <button
                 onClick={() => setOpenId(open ? null : pr.id)}
                 aria-expanded={open}
+                className="leap-pr-row"
                 style={{
                   width: '100%',
                   textAlign: 'left',
-                  display: 'grid',
-                  gridTemplateColumns: 'auto auto 1fr auto auto auto',
-                  alignItems: 'center',
-                  gap: 14,
                   padding: '14px 16px',
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                   color: 'inherit',
+                  display: 'grid',
+                  gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+                  gridTemplateAreas: '"score title chevron" "meta meta meta"',
+                  columnGap: 14,
+                  rowGap: 8,
+                  alignItems: 'center',
                   transition: 'background 200ms',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--leap-surface-soft)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 {/* score chip */}
                 <span style={{
+                  gridArea: 'score',
                   display: 'inline-flex', alignItems: 'baseline',
                   gap: 4,
                   padding: '4px 10px',
@@ -88,17 +90,46 @@ export function PRLedger({ prs }: Props) {
                   </span>
                 </span>
 
-                {/* mr id + jira key */}
+                {/* title */}
                 <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: 11, color: 'var(--leap-text-faint)',
-                  letterSpacing: '0.10em',
-                  whiteSpace: 'nowrap',
+                  gridArea: 'title',
+                  minWidth: 0,
+                  fontSize: 14, color: 'var(--leap-text)',
+                  fontWeight: 500, letterSpacing: '-0.005em',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
-                  #{pr.github_id ?? pr.id.slice(0, 5)}
+                  {pr.title}
+                </span>
+
+                {/* chevron */}
+                <span style={{
+                  gridArea: 'chevron',
+                  display: 'inline-flex',
+                  width: 28, height: 28,
+                  alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 999,
+                  color: 'var(--leap-text-faint)',
+                  transition: 'transform 240ms cubic-bezier(0.22,1,0.36,1), color 200ms',
+                  transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}>
+                  <ChevronDownIcon size={14} />
+                </span>
+
+                {/* meta row — id, jira, author, lines, points, status */}
+                <span style={{
+                  gridArea: 'meta',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  rowGap: 6, columnGap: 12,
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: 10.5, color: 'var(--leap-text-faint)',
+                  letterSpacing: '0.06em',
+                  minWidth: 0,
+                }}>
+                  <span style={{ letterSpacing: '0.10em' }}>
+                    #{pr.github_id ?? pr.id.slice(0, 5)}
+                  </span>
                   {pr.jira_key && (
                     <span style={{
                       padding: '1px 6px',
@@ -111,54 +142,25 @@ export function PRLedger({ prs }: Props) {
                       {pr.jira_key}
                     </span>
                   )}
-                </span>
-
-                {/* title */}
-                <span style={{
-                  minWidth: 0,
-                  fontSize: 14, color: 'var(--leap-text)',
-                  fontWeight: 500, letterSpacing: '-0.005em',
-                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                }}>
-                  {pr.title}
-                </span>
-
-                {/* meta */}
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center', gap: 12,
-                  fontFamily: "'Geist Mono', monospace",
-                  fontSize: 10.5, color: 'var(--leap-text-faint)',
-                  letterSpacing: '0.06em',
-                  whiteSpace: 'nowrap',
-                }}>
-                  <span><GitBranchIcon size={10} style={{ verticalAlign: '-1px', marginRight: 5 }} />
-                    {pr.author_name ?? 'unknown'}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minWidth: 0 }}>
+                    <GitBranchIcon size={10} />
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 }}>
+                      {pr.author_name ?? 'unknown'}
+                    </span>
                   </span>
-                  <span><FileDiffIcon size={10} style={{ verticalAlign: '-1px', marginRight: 5 }} />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    <FileDiffIcon size={10} />
                     {pr.lines_modified.toLocaleString()}
                   </span>
-                  <span><HashIcon size={10} style={{ verticalAlign: '-1px', marginRight: 5 }} />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    <HashIcon size={10} />
                     {pr.story_points}p
                   </span>
-                </span>
-
-                {/* status */}
-                <Pill color={pr.status === 'merged' ? '#5eead4' : pr.status === 'review' ? '#a78bfa' : '#fbbf24'}>
-                  {pr.status}
-                </Pill>
-
-                {/* chevron */}
-                <span style={{
-                  display: 'inline-flex',
-                  width: 28, height: 28,
-                  alignItems: 'center', justifyContent: 'center',
-                  borderRadius: 999,
-                  color: 'var(--leap-text-faint)',
-                  transition: 'transform 240ms cubic-bezier(0.22,1,0.36,1), color 200ms',
-                  transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-                }}>
-                  <ChevronDownIcon size={14} />
+                  <span style={{ marginLeft: 'auto' }}>
+                    <Pill color={pr.status === 'merged' ? '#5eead4' : pr.status === 'review' ? '#a78bfa' : '#fbbf24'}>
+                      {pr.status}
+                    </Pill>
+                  </span>
                 </span>
               </button>
 

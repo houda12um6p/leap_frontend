@@ -79,6 +79,7 @@ export function UserMenu() {
             exit={{    opacity: 0, y: -6, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 380, damping: 28 }}
             role="menu"
+            className="leap-user-menu"
             style={{
               position: 'absolute',
               top: 'calc(100% + 8px)',
@@ -87,10 +88,10 @@ export function UserMenu() {
               padding: 6,
               borderRadius: 14,
               border: '1px solid var(--leap-border)',
-              background: 'rgba(10, 14, 26, 0.85)',
+              background: 'var(--leap-card-bg)',
               backdropFilter: 'blur(28px) saturate(160%)',
               WebkitBackdropFilter: 'blur(28px) saturate(160%)',
-              boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
+              boxShadow: '0 24px 60px var(--leap-menu-shadow)',
             }}
           >
             <div style={{
@@ -136,8 +137,8 @@ export function UserMenu() {
                   gap: 6,
                   padding: '2px 8px',
                   borderRadius: 999,
-                  border: '1px solid rgba(94, 234, 212, 0.32)',
-                  background: 'rgba(94, 234, 212, 0.10)',
+                  border: '1px solid color-mix(in srgb, var(--leap-accent-cyan) 35%, transparent)',
+                  background: 'color-mix(in srgb, var(--leap-accent-cyan) 10%, transparent)',
                   color: 'var(--leap-accent-cyan)',
                   fontFamily: "'Geist Mono', monospace",
                   fontSize: 9.5,
@@ -152,6 +153,7 @@ export function UserMenu() {
             <button
               onClick={handleLogout}
               role="menuitem"
+              className="leap-user-menu__signout"
               style={{
                 width: '100%',
                 display: 'flex',
@@ -169,16 +171,6 @@ export function UserMenu() {
                 letterSpacing: '-0.005em',
                 transition: 'background 180ms ease, border-color 180ms ease, color 180ms ease',
                 textAlign: 'left',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(248, 113, 113, 0.08)';
-                e.currentTarget.style.borderColor = 'rgba(248, 113, 113, 0.32)';
-                e.currentTarget.style.color = '#fca5a5';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.borderColor = 'transparent';
-                e.currentTarget.style.color = 'var(--leap-text)';
               }}
             >
               <LogOutIcon size={14} />

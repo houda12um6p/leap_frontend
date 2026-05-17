@@ -169,3 +169,12 @@ export const LogOutIcon = (p: IconProps) => (
     <line x1="21" y1="12" x2="9" y2="12" />
   </svg>
 );
+
+export const TrashIcon = (p: IconProps) => (
+  <svg {...svgProps(p)}>
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+    <path d="M10 11v6M14 11v6" />
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+  </svg>
+);

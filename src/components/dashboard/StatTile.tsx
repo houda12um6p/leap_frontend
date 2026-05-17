@@ -33,7 +33,7 @@ export function StatTile({
         />
         {label}
       </div>
-      <div style={{ marginTop: 14, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+      <div style={{ marginTop: 14, display: 'flex', alignItems: 'baseline', gap: 16 }}>
         <AnimatedNumber
           value={value}
           format={format}

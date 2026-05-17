@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { Callout } from '../ui/Callout';
 import { useCreateProject } from '../../lib/api';
 import { useSnapshot } from 'valtio';
 import { dashboardState, closeAddProject } from '../../store';
@@ -30,16 +31,46 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 8,
 };
 
+const sectionHeaderStyle: React.CSSProperties = {
+  marginTop: 24,
+  paddingTop: 18,
+  borderTop: '1px solid var(--leap-border-soft)',
+  fontFamily: "'Geist Mono', monospace",
+  fontSize: 10,
+  letterSpacing: '0.28em',
+  textTransform: 'uppercase',
+  color: 'var(--leap-text-faint)',
+  marginBottom: 12,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+};
+
+const focusBorder = (e: React.FocusEvent<HTMLInputElement>) => {
+  e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.55)';
+};
+const blurBorder = (e: React.FocusEvent<HTMLInputElement>) => {
+  e.currentTarget.style.borderColor = 'var(--leap-border)';
+};
+
 export function AddProjectModal() {
   const snap = useSnapshot(dashboardState);
   const create = useCreateProject();
   const [name, setName] = useState('');
   const [repo, setRepo] = useState('');
+  const [jiraKey, setJiraKey] = useState('');
+  const [jiraUrl, setJiraUrl] = useState('');
+  const [jiraEmail, setJiraEmail] = useState('');
+  const [jiraToken, setJiraToken] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
     setName('');
     setRepo('');
+    setJiraKey('');
+    setJiraUrl('');
+    setJiraEmail('');
+    setJiraToken('');
     setError(null);
   };
 
@@ -48,7 +79,14 @@ export function AddProjectModal() {
     if (!name.trim()) return setError('Project name is required.');
     if (!repo.trim()) return setError('Repository URL is required.');
     try {
-      await create.mutateAsync({ name: name.trim(), repo_url: repo.trim() });
+      await create.mutateAsync({
+        name: name.trim(),
+        repo_url: repo.trim(),
+        jira_key:       jiraKey.trim()   ? jiraKey.trim()   : null,
+        jira_base_url:  jiraUrl.trim()   ? jiraUrl.trim()   : null,
+        jira_email:     jiraEmail.trim() ? jiraEmail.trim() : null,
+        jira_api_token: jiraToken.trim() ? jiraToken.trim() : null,
+      });
       toast.success(`Added ${name.trim()}`);
       closeAddProject();
       reset();
@@ -69,8 +107,8 @@ export function AddProjectModal() {
         onChange={(e) => setName(e.target.value)}
         placeholder="e.g. Insights Web"
         style={inputStyle}
-        onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.55)'; }}
-        onBlur={(e)  => { e.currentTarget.style.borderColor = 'var(--leap-border)'; }}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
       />
 
       <div style={{ height: 14 }} />
@@ -81,20 +119,110 @@ export function AddProjectModal() {
         onChange={(e) => setRepo(e.target.value)}
         placeholder="https://github.com/your-org/your-repo"
         style={inputStyle}
-        onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.55)'; }}
-        onBlur={(e)  => { e.currentTarget.style.borderColor = 'var(--leap-border)'; }}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
       />
 
-      {error && (
-        <div style={{
-          marginTop: 14, padding: '8px 12px',
-          borderRadius: 8,
-          background: 'rgba(248, 113, 113, 0.08)',
-          color: '#fca5a5',
+      {/* --- Jira connection --- */}
+      <div style={sectionHeaderStyle}>
+        <span style={{
+          width: 6, height: 6, borderRadius: 999,
+          background: 'var(--leap-accent-cyan)',
+          boxShadow: '0 0 8px color-mix(in srgb, var(--leap-accent-cyan) 50%, transparent)',
+        }} />
+        Jira connection <span style={{ opacity: 0.5 }}>· optional</span>
+      </div>
+
+      <label style={labelStyle}>Jira base URL</label>
+      <input
+        value={jiraUrl}
+        onChange={(e) => setJiraUrl(e.target.value)}
+        placeholder="https://your-org.atlassian.net"
+        autoComplete="off"
+        spellCheck={false}
+        style={inputStyle}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
+      />
+
+      <div style={{ height: 14 }} />
+
+      <label style={labelStyle}>Jira email</label>
+      <input
+        value={jiraEmail}
+        onChange={(e) => setJiraEmail(e.target.value)}
+        placeholder="you@your-org.com"
+        type="email"
+        autoComplete="off"
+        spellCheck={false}
+        style={inputStyle}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
+      />
+
+      <div style={{ height: 14 }} />
+
+      <label style={labelStyle}>Jira API token</label>
+      <input
+        value={jiraToken}
+        onChange={(e) => setJiraToken(e.target.value)}
+        placeholder="paste your Jira API token"
+        type="password"
+        autoComplete="new-password"
+        spellCheck={false}
+        style={inputStyle}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
+      />
+
+      <div style={{ height: 14 }} />
+
+      <label style={labelStyle}>Jira project key</label>
+      <input
+        value={jiraKey}
+        onChange={(e) => setJiraKey(e.target.value.toUpperCase())}
+        placeholder="e.g. LEAP"
+        autoCapitalize="characters"
+        spellCheck={false}
+        style={{ ...inputStyle, textTransform: 'uppercase', letterSpacing: '0.04em' }}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
+      />
+
+      <div style={{ height: 12 }} />
+
+      <Callout tone="warning" title="PR title convention">
+        For clean synchronization between GitHub and Jira, engineers must include the
+        Jira issue key in their pull request titles — e.g.&nbsp;
+        <code style={{
+          padding: '1px 6px',
+          borderRadius: 6,
+          background: 'var(--leap-surface-wash)',
+          border: '1px solid var(--leap-border-soft)',
           fontFamily: "'Geist Mono', monospace",
-          fontSize: 11,
-          letterSpacing: '0.05em',
+          fontSize: 12,
+          color: 'var(--leap-text)',
         }}>
+          [LEAP-42] Fix login bug
+        </code>.
+      </Callout>
+
+      {error && (
+        <div
+          key={error}
+          className="leap-form-error"
+          role="alert"
+          style={{
+            marginTop: 14, padding: '8px 12px',
+            borderRadius: 8,
+            background: 'rgba(248, 113, 113, 0.08)',
+            border: '1px solid rgba(248, 113, 113, 0.25)',
+            color: '#fca5a5',
+            fontFamily: "'Geist Mono', monospace",
+            fontSize: 11,
+            letterSpacing: '0.05em',
+          }}
+        >
           {error}
         </div>
       )}

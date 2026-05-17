@@ -56,6 +56,7 @@ export function CriticalFeedTile({ prs }: Props) {
             <li key={pr.id}>
               <Link
                 to={`/projects/${pr.project_id}#mr-${pr.id}`}
+                className="leap-critical-row"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -64,15 +65,7 @@ export function CriticalFeedTile({ prs }: Props) {
                   borderRadius: 12,
                   border: '1px solid var(--leap-border-soft)',
                   background: 'var(--leap-surface-soft)',
-                  transition: 'background 200ms ease, border-color 200ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--leap-surface-wash)';
-                  e.currentTarget.style.borderColor = 'var(--leap-border)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--leap-surface-soft)';
-                  e.currentTarget.style.borderColor = 'var(--leap-border-soft)';
+                  transition: 'background 200ms ease, border-color 200ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1)',
                 }}
               >
                 <span style={{

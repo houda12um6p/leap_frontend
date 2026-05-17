@@ -67,8 +67,15 @@ export default function ProjectsPage() {
             fontFamily: "'Geist Mono', monospace",
             fontSize: 10.5, letterSpacing: '0.32em',
             textTransform: 'uppercase', color: 'var(--leap-text-faint)',
+            display: 'inline-flex', alignItems: 'center', gap: 10,
           }}>
             Projects · workspace
+            {projectsQ.isFetching && !projectsQ.isLoading && (
+              <span className="leap-sync-pulse" aria-live="polite">
+                <span className="leap-sync-pulse__dot" />
+                Syncing
+              </span>
+            )}
           </div>
           <h1 className="page-title">All projects</h1>
         </div>
@@ -94,14 +101,8 @@ export default function ProjectsPage() {
         Click into a project to drill into team, tasks and the per-PR score ledger.
       </p>
 
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: 12,
-        marginBottom: 22,
-      }}>
-        <div style={{ position: 'relative', flex: '1 1 280px', minWidth: 220, maxWidth: 360 }}>
+      <div className="leap-projects-toolbar">
+        <div className="leap-projects-toolbar__search">
           <SearchIcon />
           <input
             type="text"

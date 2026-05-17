@@ -8,6 +8,10 @@ export interface Project {
   name: string;
   repo_url: string;
   status: 'active' | 'archived';
+  jira_key: string | null;
+  jira_base_url: string | null;
+  jira_email: string | null;
+  jira_api_token_set: boolean;
   created_at: string;
 }
 
